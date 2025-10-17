@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>French Vocabulary Quiz</title>
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;600;700&display=swap');
+        body {
+            font-family: 'Quicksand', sans-serif;
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+    
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+        
+        // Lucide icons as components
+        const Volume2 = () => (
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+                <path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+                <path d="M19.07 4.93a10 10 0 0 1 0 14.14"></path>
+            </svg>
+        );
+        
+        const BarChart3 = () => (
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M3 3v18h18"></path>
+                <path d="M18 17V9"></path>
+                <path d="M13 17V5"></path>
+                <path d="M8 17v-3"></path>
+            </svg>
+        );
+        
+        const RotateCcw = () => (
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path>
+                <path d="M3 3v5h5"></path>
+            </svg>
+        );
+
+        // Word data organized by grade level
+        const WORDS_BY_GRADE = {
+            grade1: [
+                { id: 67, french: "un", english: "one" },
+                { id: 68, french: "une", english: "one" },
+                { id: 69, french: "elle", english: "she" },
+                { id: 70, french: "il y a", english: "there is" },
+                { id: 71, french: "et", english: "and" },
+                { id: 72, french: "j'ai", english: "I have" },
+                { id: 73, french: "j'aime", english: "I like" },
+                { id: 74, french: "les", english: "the" },
+                { id: 75, french: "des", english: "some" },
+                { id: 76, french: "avec", english: "with" },
+                { id: 77, french: "c'est", english: "it is" },
+                { id: 78, french: "est", english: "is" },
+                { id: 79, french: "qui", english: "who" },
+                { id: 80, french: "que", english: "that" },
+                { id: 81, french: "oui", english: "yes" },
+                { id: 82, french: "ici", english: "here" },
+                { id: 83, french: "voici", english: "here is" },
+                { id: 84, french: "chez", english: "at" },
+                { id: 85, french: "aussi", english: "also" },
+                { id: 86, french: "dans", english: "in" },
+                { id: 87, french: "mange", english: "eat" },
+                { id: 88, french: "je fais", english: "I do" },
+                { id: 89, french: "je vois", english: "I see" },
+                { id: 90, french: "je peux", english: "I can" },
+                { id: 91, french: "je veux", english: "I want" },
+                { id: 92, french: "je viens", english: "I come" },
+                { id: 93, french: "je suis", english: "I am" },
+                { id: 94, french: "est-ce que", english: "question word" },
+                { id: 95, french: "parce-que", english: "because" },
+                { id: 96, french: "beaucoup", english: "a lot" },
+                { id: 97, french: "merci", english: "thank you" },
+                { id: 98, french: "regarde", english: "look" },
+            ],
+            grade2: [
+                { id: 35, french: "six", english: "six" },
+                { id: 36, french: "dix", english: "ten" },
+                { id: 37, french: "sept", english: "seven" },
+                { id: 38, french: "huit", english: "eight" },
+                { id: 39, french: "quatre", english: "four" },
+                { id: 40, french: "cinq", english: "five" },
+                { id: 41, french: "combien", english: "how many" },
+                { id: 42, french: "dehors", english: "outside" },
+                { id: 43, french: "aujourd'hui", english: "today" },
+                { id: 44, french: "demain", english: "tomorrow" },
+                { id: 45, french: "un homme", english: "a man" },
+                { id: 46, french: "une femme", english: "a woman" },
+                { id: 47, french: "le fils", english: "the son" },
+                { id: 48, french: "la fille", english: "the daughter" },
+                { id: 49, french: "une famille", english: "a family" },
+                { id: 50, french: "quand", english: "when" },
+                { id: 51, french: "pourquoi", english: "why" },
+                { id: 52, french: "quelque chose", english: "something" },
+                { id: 53, french: "il cherche", english: "he searches" },
+                { id: 54, french: "j'ai faim", english: "I'm hungry" },
+                { id: 55, french: "le soleil", english: "the sun" },
+                { id: 56, french: "une feuille", english: "a leaf" },
+                { id: 57, french: "maintenant", english: "now" },
+                { id: 58, french: "l'heure", english: "the time" },
+                { id: 59, french: "heureux", english: "happy" },
+                { id: 60, french: "heureuse", english: "happy" },
+                { id: 61, french: "les yeux", english: "the eyes" },
+                { id: 62, french: "l'œil", english: "the eye" },
+                { id: 63, french: "derrière", english: "behind" },
+                { id: 64, french: "le coin", english: "the corner" },
+                { id: 65, french: "jusqu'à", english: "until" },
+                { id: 66, french: "presque", english: "almost" },
+            ],
+            grade3: [
+                { id: 1, french: "à propos", english: "about" },
+                { id: 2, french: "à travers", english: "through" },
+                { id: 3, french: "au dessus", english: "above" },
+                { id: 4, french: "au dessous", english: "below" },
+                { id: 5, french: "aussitôt", english: "immediately" },
+                { id: 6, french: "automne", english: "autumn" },
+                { id: 7, french: "besoin", english: "need" },
+                { id: 8, french: "bientôt", english: "soon" },
+                { id: 9, french: "chacun", english: "each" },
+                { id: 10, french: "combien", english: "how many" },
+                { id: 11, french: "comment", english: "how" },
+                { id: 12, french: "devant", english: "in front" },
+                { id: 13, french: "en arrière", english: "behind" },
+                { id: 14, french: "ensuite", english: "then" },
+                { id: 15, french: "jamais", english: "never" },
+                { id: 16, french: "long", english: "long" },
+                { id: 17, french: "longtemps", english: "a long time" },
+                { id: 18, french: "lorsque", english: "when" },
+                { id: 19, french: "monsieur", english: "mister" },
+                { id: 20, french: "parfois", english: "sometimes" },
+                { id: 21, french: "partout", english: "everywhere" },
+                { id: 22, french: "pendant", english: "during" },
+                { id: 23, french: "personne", english: "nobody" },
+                { id: 24, french: "peut-être", english: "maybe" },
+                { id: 25, french: "plusieurs", english: "several" },
+                { id: 26, french: "seulement", english: "only" },
+                { id: 27, french: "souvent", english: "often" },
+                { id: 28, french: "temps", english: "time" },
+                { id: 29, french: "vraiment", english: "really" },
+                { id: 30, french: "elles montrent", english: "they show" },
+                { id: 31, french: "ils choisissent", english: "they choose" },
+                { id: 32, french: "nous sommes", english: "we are" },
+                { id: 33, french: "elles prennent", english: "they take" },
+                { id: 34, french: "ils étaient", english: "they were" },
+            ]
+        };
+
+        // Settings - edit these!
+        const SETTINGS = {
+            multipleChoiceCount: 2,
+            quizDirection: 'french-to-english',
+        };
+
+        const FrenchQuiz = () => {
+            const [selectedGrade, setSelectedGrade] = useState('grade1');
+            const [currentQuestion, setCurrentQuestion] = useState(null);
+            const [choices, setChoices] = useState([]);
+            const [selectedAnswer, setSelectedAnswer] = useState(null);
+            const [showResult, setShowResult] = useState(false);
+            const [stats, setStats] = useState({});
+            const [showProgress, setShowProgress] = useState(false);
+            const [soundEnabled, setSoundEnabled] = useState(true);
+
+            useEffect(() => {
+                const savedStats = localStorage.getItem('frenchQuizStats');
+                if (savedStats) {
+                    setStats(JSON.parse(savedStats));
+                }
+            }, []);
+
+            useEffect(() => {
+                if (Object.keys(stats).length > 0) {
+                    localStorage.setItem('frenchQuizStats', JSON.stringify(stats));
+                }
+            }, [stats]);
+
+            const playSound = (type) => {
+                if (!soundEnabled) return;
+                
+                const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                const oscillator = audioContext.createOscillator();
+                const gainNode = audioContext.createGain();
+                
+                oscillator.connect(gainNode);
+                gainNode.connect(audioContext.destination);
+                
+                if (type === 'correct') {
+                    oscillator.frequency.setValueAtTime(523.25, audioContext.currentTime);
+                    oscillator.frequency.setValueAtTime(659.25, audioContext.currentTime + 0.1);
+                    oscillator.frequency.setValueAtTime(783.99, audioContext.currentTime + 0.2);
+                    gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+                    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.4);
+                    oscillator.start(audioContext.currentTime);
+                    oscillator.stop(audioContext.currentTime + 0.4);
+                } else {
+                    oscillator.frequency.setValueAtTime(392.00, audioContext.currentTime);
+                    oscillator.frequency.setValueAtTime(329.63, audioContext.currentTime + 0.15);
+                    gainNode.gain.setValueAtTime(0.2, audioContext.currentTime);
+                    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.3);
+                    oscillator.start(audioContext.currentTime);
+                    oscillator.stop(audioContext.currentTime + 0.3);
+                }
+            };
+
+            const generateQuestion = (grade = selectedGrade) => {
+                const wordsForGrade = WORDS_BY_GRADE[grade];
+                const word = wordsForGrade[Math.floor(Math.random() * wordsForGrade.length)];
+                
+                const wrongAnswers = [];
+                const correctAnswer = SETTINGS.quizDirection === 'french-to-english' ? word.english : word.french;
+                
+                while (wrongAnswers.length < SETTINGS.multipleChoiceCount - 1) {
+                    const randomWord = wordsForGrade[Math.floor(Math.random() * wordsForGrade.length)];
+                    const wrongAnswer = SETTINGS.quizDirection === 'french-to-english' ? randomWord.english : randomWord.french;
+                    
+                    if (wrongAnswer !== correctAnswer && !wrongAnswers.includes(wrongAnswer)) {
+                        wrongAnswers.push(wrongAnswer);
+                    }
+                }
+                
+                const allChoices = [...wrongAnswers, correctAnswer].sort(() => Math.random() - 0.5);
+                
+                setCurrentQuestion(word);
+                setChoices(allChoices);
+                setSelectedAnswer(null);
+                setShowResult(false);
+            };
+
+            const handleAnswer = (answer) => {
+                const correctAnswer = SETTINGS.quizDirection === 'french-to-english' 
+                    ? currentQuestion.english 
+                    : currentQuestion.french;
+                
+                const isCorrect = answer === correctAnswer;
+                setSelectedAnswer(answer);
+                setShowResult(true);
+                
+                const wordId = currentQuestion.id;
+                setStats(prev => ({
+                    ...prev,
+                    [wordId]: {
+                        ...prev[wordId],
+                        attempts: (prev[wordId]?.attempts || 0) + 1,
+                        correct: (prev[wordId]?.correct || 0) + (isCorrect ? 1 : 0),
+                        incorrect: (prev[wordId]?.incorrect || 0) + (isCorrect ? 0 : 1),
+                        grade: selectedGrade,
+                    }
+                }));
+                
+                playSound(isCorrect ? 'correct' : 'wrong');
+            };
+
+            const handleGradeChange = (grade) => {
+                setSelectedGrade(grade);
+                generateQuestion(grade);
+            };
+
+            const getProgressDataForGrade = (grade) => {
+                const wordsForGrade = WORDS_BY_GRADE[grade];
+                const notAttempted = wordsForGrade.filter(w => !stats[w.id]);
+                const attempted = wordsForGrade.filter(w => stats[w.id]);
+                const allCorrect = attempted.filter(w => stats[w.id].incorrect === 0);
+                const hasIncorrect = attempted.filter(w => stats[w.id].incorrect > 0);
+                
+                return { notAttempted, allCorrect, hasIncorrect, total: wordsForGrade.length };
+            };
+
+            useEffect(() => {
+                generateQuestion();
+            }, []);
+
+            if (showProgress) {
+                const grade1Progress = getProgressDataForGrade('grade1');
+                const grade2Progress = getProgressDataForGrade('grade2');
+                const grade3Progress = getProgressDataForGrade('grade3');
+                
+                const renderGradeProgress = (gradeName, gradeKey, progressData) => {
+                    const { notAttempted, allCorrect, hasIncorrect, total } = progressData;
+                    const percentComplete = Math.round((allCorrect.length / total) * 100);
+                    
+                    return (
+                        <div key={gradeKey} className="mb-8 bg-white rounded-3xl shadow-xl p-6 border-4 border-amber-200">
+                            <div className="flex justify-between items-center mb-4">
+                                <h2 className="text-3xl font-bold text-green-800">{gradeName}</h2>
+                                <div className="text-right">
+                                    <div className="text-2xl font-bold text-green-700">{percentComplete}%</div>
+                                    <div className="text-sm text-gray-600">{allCorrect.length}/{total} mastered</div>
+                                </div>
+                            </div>
+                            
+                            <div className="w-full bg-gray-200 rounded-full h-6 mb-6">
+                                <div 
+                                    className="bg-green-500 h-6 rounded-full transition-all duration-500"
+                                    style={{ width: `${percentComplete}%` }}
+                                />
+                            </div>
+                            
+                            <div className="space-y-4">
+                                <div className="bg-blue-50 p-4 rounded-xl border-2 border-blue-200">
+                                    <h3 className="text-lg font-bold text-blue-800 mb-2">
+                                        Not Tried Yet ({notAttempted.length})
+                                    </h3>
+                                    <div className="flex flex-wrap gap-2">
+                                        {notAttempted.length > 0 ? notAttempted.map(w => (
+                                            <span key={w.id} className="px-2 py-1 bg-blue-200 rounded-full text-xs font-semibold">
+                                                {w.french}
+                                            </span>
+                                        )) : <span className="text-blue-600 text-sm">All words attempted! 🎉</span>}
+                                    </div>
+                                </div>
+                                
+                                <div className="bg-green-50 p-4 rounded-xl border-2 border-green-200">
+                                    <h3 className="text-lg font-bold text-green-800 mb-2">
+                                        All Correct! 🌟 ({allCorrect.length})
+                                    </h3>
+                                    <div className="flex flex-wrap gap-2">
+                                        {allCorrect.length > 0 ? allCorrect.map(w => (
+                                            <span key={w.id} className="px-2 py-1 bg-green-200 rounded-full text-xs font-semibold">
+                                                {w.french} ({stats[w.id].correct}/{stats[w.id].attempts})
+                                            </span>
+                                        )) : <span className="text-green-600 text-sm">Keep practicing! 💪</span>}
+                                    </div>
+                                </div>
+                                
+                                <div className="bg-orange-50 p-4 rounded-xl border-2 border-orange-200">
+                                    <h3 className="text-lg font-bold text-orange-800 mb-2">
+                                        Need Practice 💪 ({hasIncorrect.length})
+                                    </h3>
+                                    <div className="flex flex-wrap gap-2">
+                                        {hasIncorrect.length > 0 ? hasIncorrect.map(w => (
+                                            <span key={w.id} className="px-2 py-1 bg-orange-200 rounded-full text-xs font-semibold">
+                                                {w.french} ({stats[w.id].correct}/{stats[w.id].attempts})
+                                            </span>
+                                        )) : <span className="text-orange-600 text-sm">No mistakes yet! ✨</span>}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    );
+                };
+                
+                return (
+                    <div className="min-h-screen bg-gradient-to-b from-amber-50 to-green-100 p-8">
+                        <div className="max-w-5xl mx-auto">
+                            <div className="flex justify-between items-center mb-8">
+                                <h1 className="text-4xl font-bold text-green-800">Progress Report 📊</h1>
+                                <button
+                                    onClick={() => setShowProgress(false)}
+                                    className="px-6 py-3 bg-green-600 text-white rounded-full hover:bg-green-700 transition-all transform hover:scale-105 font-bold"
+                                >
+                                    Back to Quiz
+                                </button>
+                            </div>
+                            
+                            {renderGradeProgress('Grade 1 🌱', 'grade1', grade1Progress)}
+                            {renderGradeProgress('Grade 2 🌿', 'grade2', grade2Progress)}
+                            {renderGradeProgress('Grade 3 🌳', 'grade3', grade3Progress)}
+                        </div>
+                    </div>
+                );
+            }
+
+            if (!currentQuestion) return null;
+
+            const questionText = SETTINGS.quizDirection === 'french-to-english' 
+                ? currentQuestion.french 
+                : currentQuestion.english;
+            
+            const correctAnswer = SETTINGS.quizDirection === 'french-to-english'
+                ? currentQuestion.english
+                : currentQuestion.french;
+
+            const gradeLabels = {
+                grade1: 'Grade 1 🌱',
+                grade2: 'Grade 2 🌿',
+                grade3: 'Grade 3 🌳'
+            };
+
+            return (
+                <div className="min-h-screen bg-gradient-to-b from-amber-50 to-green-100 p-8">
+                    <div className="max-w-3xl mx-auto">
+                        <div className="flex justify-between items-center mb-6">
+                            <h1 className="text-4xl font-bold text-green-800 flex items-center gap-3">
+                                🦊 French Quiz
+                            </h1>
+                            <div className="flex gap-3">
+                                <button
+                                    onClick={() => setSoundEnabled(!soundEnabled)}
+                                    className={`p-3 rounded-full ${soundEnabled ? 'bg-green-600' : 'bg-gray-400'} text-white hover:scale-110 transition-transform`}
+                                    title={soundEnabled ? 'Sound On' : 'Sound Off'}
+                                >
+                                    <Volume2 />
+                                </button>
+                                <button
+                                    onClick={() => setShowProgress(true)}
+                                    className="px-6 py-3 bg-blue-600 text-white rounded-full hover:bg-blue-700 transition-all transform hover:scale-105 font-bold flex items-center gap-2"
+                                >
+                                    <BarChart3 />
+                                    Progress
+                                </button>
+                            </div>
+                        </div>
+
+                        <div className="flex gap-3 mb-6">
+                            {Object.keys(WORDS_BY_GRADE).map(grade => (
+                                <button
+                                    key={grade}
+                                    onClick={() => handleGradeChange(grade)}
+                                    className={`flex-1 py-4 rounded-2xl text-xl font-bold transition-all transform hover:scale-105 border-4
+                                        ${selectedGrade === grade 
+                                            ? 'bg-green-600 text-white border-green-700 shadow-lg' 
+                                            : 'bg-white text-green-800 border-green-300 hover:bg-green-50'
+                                        }`}
+                                >
+                                    {gradeLabels[grade]}
+                                </button>
+                            ))}
+                        </div>
+
+                        <div className="bg-white rounded-3xl shadow-2xl p-12 mb-8 border-8 border-green-200">
+                            <div className="text-center mb-8">
+                                <p className="text-gray-600 text-lg mb-3">What does this mean?</p>
+                                <h2 className="text-5xl font-bold text-green-800 mb-6">{questionText}</h2>
+                                {currentQuestion && stats[currentQuestion.id] && (
+                                    <p className="text-sm text-gray-500">
+                                        Attempted: {stats[currentQuestion.id].attempts} times
+                                    </p>
+                                )}
+                            </div>
+
+                            <div className="space-y-4">
+                                {choices.map((choice, index) => {
+                                    const isSelected = selectedAnswer === choice;
+                                    const isCorrect = choice === correctAnswer;
+                                    const showCorrect = showResult && isCorrect;
+                                    const showWrong = showResult && isSelected && !isCorrect;
+                                    
+                                    return (
+                                        <button
+                                            key={index}
+                                            onClick={() => !showResult && handleAnswer(choice)}
+                                            disabled={showResult}
+                                            className={`w-full p-6 rounded-2xl text-2xl font-bold transition-all transform hover:scale-105 border-4
+                                                ${showCorrect ? 'bg-green-500 text-white border-green-600 scale-105' : ''}
+                                                ${showWrong ? 'bg-red-400 text-white border-red-500' : ''}
+                                                ${!showResult ? 'bg-amber-100 border-amber-300 hover:bg-amber-200 text-green-800' : ''}
+                                                ${showResult && !isSelected && !isCorrect ? 'bg-gray-200 border-gray-300 text-gray-500' : ''}
+                                            `}
+                                        >
+                                            {showCorrect && '🌟 '}
+                                            {choice}
+                                            {showWrong && ' ❌'}
+                                        </button>
+                                    );
+                                })}
+                            </div>
+
+                            {showResult && (
+                                <div className="mt-8 text-center">
+                                    <button
+                                        onClick={() => generateQuestion()}
+                                        className="px-10 py-4 bg-green-600 text-white rounded-full text-2xl font-bold hover:bg-green-700 transition-all transform hover:scale-110 shadow-lg flex items-center gap-3 mx-auto"
+                                    >
+                                        Next Question <RotateCcw />
+                                    </button>
+                                </div>
+                            )}
+                        </div>
+
+                        <div className="text-center text-6xl space-x-4 animate-pulse">
+                            🦌 🐿️ 🦊 🐻 🦉
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        ReactDOM.render(<FrenchQuiz />, document.getElementById('root'));
+    </script>
+</body>
+</html>
