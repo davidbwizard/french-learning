@@ -211,7 +211,7 @@ const QuizHeader = ({
                                     : 'text-gray-300 hover:bg-white/5 hover:text-white'
                             }`}
                         >
-                            📝 Quiz
+                            <FontAwesomeIcon icon={faClipboardCheck} className="size-4" /> Quiz
                         </button>
                         <button 
                             onClick={() => handleModeClick('flashcard')}
@@ -221,7 +221,7 @@ const QuizHeader = ({
                                     : 'text-gray-300 hover:bg-white/5 hover:text-white'
                             }`}
                         >
-                            🗂️ Index
+                            <FontAwesomeIcon icon={faRectangleList} className="size-4" /> Flash Card
                         </button>
                     </div>
                 </div>
