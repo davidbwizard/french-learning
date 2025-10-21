@@ -11,7 +11,9 @@ import QuizHeader from './components/Quiz/QuizHeader';
 import PracticeModeBanner from './components/Quiz/PracticeModeBanner';
 import CategoryTabs from './components/Quiz/CategoryTabs';
 import QuestionCard from './components/Quiz/QuestionCard';
+import FlashCard from './components/Quiz/FlashCard';
 import AnimalFooter from './components/UI/AnimalFooter';
+import CongratsModal from './components/Quiz/CongratsModal';
 
 // Hooks
 import { useProfiles } from './hooks/useProfiles';
@@ -24,6 +26,7 @@ const FrenchQuiz = () => {
 	const [showProgress, setShowProgress] = useState(false);
 	const [showProfileDropdown, setShowProfileDropdown] = useState(false);
 	const [soundEnabled, setSoundEnabled] = useState(true);
+	const [currentMode, setCurrentMode] = useState('quiz'); // 'quiz' or 'flashcard'
 
 	const {
 		currentQuestion,
@@ -32,8 +35,12 @@ const FrenchQuiz = () => {
 		showResult,
 		questionText,
 		correctAnswer,
+		sessionComplete,
 		generateQuestion,
-		selectAnswer
+		selectAnswer,
+		nextQuestion,
+		resetSession,
+		resetAndRestart
 	} = useQuizState(selectedCategory, practiceMode);
 
 	const {
@@ -62,7 +69,12 @@ const FrenchQuiz = () => {
 
     const handleCategoryChange = (category) => {
         setSelectedCategory(category);
-        generateQuestion(category);
+        resetAndRestart(category);
+    };
+    
+    const handleModeChange = (mode) => {
+        setCurrentMode(mode);
+        resetAndRestart(selectedCategory, practiceMode ? practiceMode.words : null);
     };
 
 	const getProgressData = (category) => {
@@ -73,12 +85,29 @@ const FrenchQuiz = () => {
     const startPracticeMode = (category, words) => {
         setPracticeMode({ category, words });
         setShowProgress(false);
-        generateQuestion(category, words);
+        resetAndRestart(category, words);
     };
 
     const exitPracticeMode = () => {
         setPracticeMode(null);
-        generateQuestion(selectedCategory);
+        resetAndRestart(selectedCategory);
+    };
+
+    const handleTryAgain = () => {
+        const category = practiceMode ? practiceMode.category : selectedCategory;
+        const wordPool = practiceMode ? practiceMode.words : null;
+        resetAndRestart(category, wordPool);
+    };
+    
+    const handleCloseModal = () => {
+        resetSession();
+    };
+
+    const handlePracticeHardWords = () => {
+        const progressData = getProgressData(selectedCategory);
+        if (progressData.hasIncorrect.length > 0) {
+            startPracticeMode(selectedCategory, progressData.hasIncorrect);
+        }
     };
 
     useEffect(() => {
@@ -109,16 +138,20 @@ const FrenchQuiz = () => {
 		);
 	}
 
-    if (!currentQuestion) return null;
-    // const currentProfile = profiles[currentProfileId];
+    if (!currentQuestion && !sessionComplete) return null;
+
+    const progressData = getProgressData(practiceMode ? practiceMode.category : selectedCategory);
+    const hasHardWords = progressData.hasIncorrect.length > 0;
 
     return (
-        <div className="min-h-screen bg-gradient-to-b from-amber-50 to-green-100 p-8">
-            <div className="max-w-3xl mx-auto">
+        <div className="min-h-screen bg-gradient-to-b from-amber-50 to-green-100">
+            <div className="mx-auto">
 				<QuizHeader
 					currentProfile={currentProfile}
 					profiles={profiles}
 					currentProfileId={currentProfileId}
+					currentMode={currentMode}
+					onModeChange={handleModeChange}
 					showProfileDropdown={showProfileDropdown}
 					setShowProfileDropdown={setShowProfileDropdown}
 					onSwitchProfile={switchProfile}
@@ -138,20 +171,44 @@ const FrenchQuiz = () => {
 					onSelectCategory={handleCategoryChange}
 					practiceMode={practiceMode}
 				/>
-				<QuestionCard
-					questionText={questionText}
-					currentQuestion={currentQuestion}
-					getCurrentStats={getCurrentStats}
-					choices={choices}
-					selectedAnswer={selectedAnswer}
-					correctAnswer={correctAnswer}
-					showResult={showResult}
-					onAnswer={handleAnswer}
-					onNextQuestion={() => generateQuestion(
-						practiceMode ? practiceMode.category : selectedCategory, 
-						practiceMode ? practiceMode.words : null
-					)}
-				/>
+
+                {currentQuestion && currentMode === 'quiz' && (
+                    <QuestionCard
+                        questionText={questionText}
+                        currentQuestion={currentQuestion}
+                        getCurrentStats={getCurrentStats}
+                        choices={choices}
+                        selectedAnswer={selectedAnswer}
+                        correctAnswer={correctAnswer}
+                        showResult={showResult}
+                        onAnswer={handleAnswer}
+                        onNextQuestion={() => nextQuestion(
+                            practiceMode ? practiceMode.category : selectedCategory, 
+                            practiceMode ? practiceMode.words : null
+                        )}
+                    />
+                )}
+
+                {currentQuestion && currentMode === 'flashcard' && (
+                    <FlashCard
+                        questionText={questionText}
+                        answerText={correctAnswer}
+                        currentQuestion={currentQuestion}
+                        onNextCard={() => nextQuestion(
+                            practiceMode ? practiceMode.category : selectedCategory, 
+                            practiceMode ? practiceMode.words : null
+                        )}
+                    />
+                )}
+
+                <CongratsModal
+                    isOpen={sessionComplete}
+                    onClose={handleCloseModal}
+                    onPracticeHardWords={handlePracticeHardWords}
+                    onTryAgain={handleTryAgain}
+                    hasHardWords={hasHardWords}
+                    isPracticeMode={!!practiceMode}
+                />
 
                 <AnimalFooter />
             </div>

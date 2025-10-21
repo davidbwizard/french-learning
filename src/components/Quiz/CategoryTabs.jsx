@@ -5,7 +5,7 @@ const CategoryTabs = ({ selectedCategory, onSelectCategory, practiceMode }) => {
     if (practiceMode) return null;
 
     return (
-        <div className="flex gap-3 mb-6">
+        <div className="max-w-3xl mx-auto flex gap-3 mb-6 mt-8">
             {Object.keys(WORDS_BY_CATEGORY).map(categoryKey => {
                 const config = CATEGORY_CONFIG[categoryKey];
                 return (

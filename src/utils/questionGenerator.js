@@ -1,6 +1,16 @@
-export const generateQuestion = (category, wordsByCategory, settings, wordPool = null) => {
+export const generateQuestion = (category, wordsByCategory, settings, wordPool = null, seenWordIds = []) => {
     const wordsForCategory = wordPool || wordsByCategory[category];
-    const word = wordsForCategory[Math.floor(Math.random() * wordsForCategory.length)];
+    
+    // Filter out words already seen this session
+    const unseenWords = wordsForCategory.filter(word => !seenWordIds.includes(word.id));
+    
+    // If all words have been seen, return session complete flag
+    if (unseenWords.length === 0) {
+        return { sessionComplete: true };
+    }
+    
+    // Pick a random unseen word
+    const word = unseenWords[Math.floor(Math.random() * unseenWords.length)];
     const correctAnswer = settings.quizDirection === 'french-to-english' ? word.english : word.french;
     
     // Shuffle and pick sequentially to avoid infinite loops
@@ -23,7 +33,8 @@ export const generateQuestion = (category, wordsByCategory, settings, wordPool =
     return {
         word,
         choices: allChoices,
-        correctAnswer
+        correctAnswer,
+        sessionComplete: false
     };
 };
 

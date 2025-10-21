@@ -13,7 +13,7 @@ const QuestionCard = ({
     onNextQuestion
 }) => {
     return (
-        <div className="bg-white rounded-3xl shadow-2xl p-12 mb-8 border-8 border-green-200">
+        <div className="max-w-3xl mx-auto bg-white rounded-3xl shadow-2xl p-12 mb-8 border-8 border-green-200">
             <div className="text-center mb-8">
                 <p className="text-gray-600 text-lg mb-3">What does this mean?</p>
                 <h2 className="text-5xl font-bold text-green-800 mb-6">{questionText}</h2>
