@@ -1,8 +1,10 @@
+import { Leaf, Tree, TreePalm } from '@phosphor-icons/react';
+
 // Category configuration - Easy to add new categories!
 const CATEGORY_CONFIG = {
-    grade1: { label: "Grade 1", icon: "🌱" },
-    grade2: { label: "Grade 2", icon: "🌿" },
-    grade3: { label: "Grade 3", icon: "🌳" },
+    grade1: { label: "Grade 1", icon: Leaf },
+    grade2: { label: "Grade 2", icon: TreePalm },
+    grade3: { label: "Grade 3", icon: Tree },
 };
 
 // Word data organized by category

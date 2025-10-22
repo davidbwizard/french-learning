@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import SpeakerIcon from '../UI/SpeakerIcon'; // Add this import
 
 const FlashCard = ({ 
     questionText, 
@@ -14,7 +15,9 @@ const FlashCard = ({
 
     const handleNext = () => {
         setIsFlipped(false);
-        onNextCard();
+        setTimeout(() => {
+            onNextCard();
+        }, 200);
     };
 
     return (
@@ -35,8 +38,11 @@ const FlashCard = ({
                         className="absolute w-full h-full bg-white rounded-3xl shadow-2xl p-8 flex flex-col items-center justify-center backface-hidden"
                         style={{ backfaceVisibility: 'hidden' }}
                     >
-                        <div className="text-6xl font-bold text-gray-800 mb-4">
-                            {questionText}
+                        <div className="flex items-center gap-4 mb-4">
+                            <div className="text-6xl font-bold text-gray-800">
+                                {questionText}
+                            </div>
+                            <SpeakerIcon text={questionText} />
                         </div>
                         <div className="text-gray-400 text-sm mt-8">
                             👆 Tap to reveal answer

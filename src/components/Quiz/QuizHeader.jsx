@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { Hamburger, ClipboardText, SpeakerHigh, SpeakerSimpleSlash, Cards, ChartBar, PlusSquare, PencilLine, PersonSimpleRun, X, Brain } from '@phosphor-icons/react'
 ;
-import { faVolumeHigh, faVolumeMute, faRectangleList, faClipboardCheck, faPlus, faPencil, faChartBar, faUsers } from '@fortawesome/free-solid-svg-icons';
 
 const QuizHeader = ({ 
     currentProfile, 
@@ -41,7 +40,7 @@ const QuizHeader = ({
     };
 
     return (
-        <nav className="relative bg-green-600 after:pointer-events-none after:absolute after:inset-x-0 after:bottom-0 after:h-px after:bg-white/10 shadow-lg">
+        <nav className="relative bg-green-600 after:pointer-events-none after:absolute after:inset-x-0 after:bottom-0 after:h-px after:bg-white/10 shadow-lg border-4 border-green-700">
             <div className="mx-auto max-w-7xl px-2 sm:px-6 lg:px-8">
                 <div className="relative flex h-16 items-center justify-between">
                     {/* Mobile menu button */}
@@ -55,13 +54,9 @@ const QuizHeader = ({
                             <span className="absolute -inset-0.5"></span>
                             <span className="sr-only">Open main menu</span>
                             {showMobileMenu ? (
-                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="size-6">
-                                    <path d="M6 18 18 6M6 6l12 12" strokeLinecap="round" strokeLinejoin="round" />
-                                </svg>
+								<X size={32} className="inline-block" weight="duotone" />
                             ) : (
-                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="size-6">
-                                    <path d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" strokeLinecap="round" strokeLinejoin="round" />
-                                </svg>
+								<Hamburger size={32} className="inline-block" weight="duotone" />
                             )}
                         </button>
                     </div>
@@ -69,11 +64,12 @@ const QuizHeader = ({
                     {/* Logo and nav links */}
                     <div className="flex flex-1 items-center justify-center sm:items-stretch sm:justify-start">
                         <div className="flex shrink-0 items-center">
-                            <img 
+                            {/* <img 
                                 src="/french-learning/images/logo.png" 
                                 alt="BrainBox" 
                                 className="h-8 w-auto" 
-                            />
+                            /> */}
+							<Brain size={32} className="inline-block" weight="duotone" color="white"/>
                             <span className="ml-2 text-white font-bold">BrainBox</span>
                         </div>
                         <div className="hidden sm:ml-6 sm:block">
@@ -86,7 +82,7 @@ const QuizHeader = ({
                                             : 'text-white hover:bg-white/5 hover:text-white'
                                     }`}
                                 >
-                                    <FontAwesomeIcon icon={faClipboardCheck} className="size-4" /> Quiz
+                                    <ClipboardText size={32} className="inline-block" weight="duotone"/> Quiz
                                 </button>
                                 <button 
                                     onClick={() => handleModeClick('flashcard')}
@@ -96,7 +92,7 @@ const QuizHeader = ({
                                             : 'text-white hover:bg-white/5 hover:text-white'
                                     }`}
                                 >
-                                    <FontAwesomeIcon icon={faRectangleList} className="size-4" /> Flash Card
+                                    <Cards size={32} className="inline-block" weight="duotone" /> Flash Card
                                 </button>
                             </div>
                         </div>
@@ -112,7 +108,7 @@ const QuizHeader = ({
                         >
                             <span className="absolute -inset-1.5"></span>
                             <span className="sr-only">Toggle sound</span>
-                            {soundEnabled ? <FontAwesomeIcon icon={faVolumeHigh} className="size-6"/> : <FontAwesomeIcon icon={faVolumeMute} className="size-6" />}
+                            {soundEnabled ? <SpeakerHigh size={32} className="inline-block" weight="duotone" /> : <SpeakerSimpleSlash size={32} className="inline-block" weight="duotone"/>}
                         </button>
 
                         {/* Profile dropdown */}
@@ -131,18 +127,18 @@ const QuizHeader = ({
 
                             {/* Profile dropdown menu */}
                             {showProfileDropdown && (
-                                <div className="absolute right-0 z-10 mt-2 w-48 origin-top-right rounded-md bg-gray-800 py-1 shadow-lg ring-1 ring-black/5 focus:outline-none">
+                                <div className="absolute right-0 z-10 mt-2 w-48 origin-top-right rounded-md bg-green-800 py-1 shadow-lg ring-1 ring-black/5 focus:outline-none">
                                     <button
                                         onClick={onShowProgress}
                                         className="block w-full px-4 py-2 text-left text-sm text-gray-300 hover:bg-white/5 hover:text-white"
                                     >
-                                        <FontAwesomeIcon icon={faChartBar} className="size-4" /> Progress
+                                        <ChartBar size={32} weight="duotone" className="inline-block"/> Progress
                                     </button>
                                     <button
                                         onClick={handleManageProfilesClick}
                                         className="block w-full px-4 py-2 text-left text-sm text-gray-300 hover:bg-white/5 hover:text-white"
                                     >
-                                        <FontAwesomeIcon icon={faUsers} className="size-4" /> Manage Profiles
+                                        <PersonSimpleRun size={32} className="inline-block"/> Manage Profiles
                                     </button>
                                 </div>
                             )}
@@ -175,7 +171,7 @@ const QuizHeader = ({
         }}
         className="w-full text-left px-4 py-3 rounded-xl hover:bg-green-100 transition-all font-semibold text-green-700 border-t-2 border-gray-200 mt-2"
     >
-        <FontAwesomeIcon icon={faPlus} className="size-4 mr-2" />
+        <PlusSquare size={32} className="inline-block"/>
         <span>Add</span>
     </button>
 ) : (
@@ -187,7 +183,7 @@ const QuizHeader = ({
         }}
         className="w-full text-left px-4 py-3 rounded-xl hover:bg-red-100 transition-all font-semibold text-red-700 border-t-2 border-gray-200 mt-2"
     >
-        <FontAwesomeIcon icon={faPencil} className="size-4 mr-2" />
+        <PencilLine size={32} weight="duotone" className="inline-block"/>
         <span>Remove</span>
     </button>
 )}
@@ -211,7 +207,7 @@ const QuizHeader = ({
                                     : 'text-gray-300 hover:bg-white/5 hover:text-white'
                             }`}
                         >
-                            <FontAwesomeIcon icon={faClipboardCheck} className="size-4" /> Quiz
+                            <ClipboardText size={32} className="inline-block" /> Quiz
                         </button>
                         <button 
                             onClick={() => handleModeClick('flashcard')}
@@ -221,7 +217,7 @@ const QuizHeader = ({
                                     : 'text-gray-300 hover:bg-white/5 hover:text-white'
                             }`}
                         >
-                            <FontAwesomeIcon icon={faRectangleList} className="size-4" /> Flash Card
+                            <Cards size={32} className="inline-block" weight="duotone" /> Flash Card
                         </button>
                     </div>
                 </div>

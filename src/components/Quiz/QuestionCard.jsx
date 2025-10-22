@@ -1,5 +1,6 @@
 import React from 'react';
 import { RotateCcw } from '../UI/Icons';
+import SpeakerIcon from '../UI/SpeakerIcon';
 
 const QuestionCard = ({ 
     questionText,
@@ -16,7 +17,10 @@ const QuestionCard = ({
         <div className="max-w-3xl mx-auto bg-white rounded-3xl shadow-2xl p-12 mb-8 border-8 border-green-200">
             <div className="text-center mb-8">
                 <p className="text-gray-600 text-lg mb-3">What does this mean?</p>
-                <h2 className="text-5xl font-bold text-green-800 mb-6">{questionText}</h2>
+                <div className="flex items-center justify-center gap-4 mb-6">
+                    <h2 className="text-5xl font-bold text-green-800">{questionText}</h2>
+                    <SpeakerIcon text={questionText} />
+                </div>
                 {currentQuestion && getCurrentStats()[currentQuestion.id] && (
                     <p className="text-sm text-gray-500">
                         Attempted: {getCurrentStats()[currentQuestion.id].attempts} times

@@ -1,6 +1,7 @@
 import React from 'react';
 import { CATEGORY_CONFIG, WORDS_BY_CATEGORY } from '../../data/words';
 import { calculatePercentComplete } from '../../utils/statsCalculator';
+import { ChartBar, CaretCircleLeft } from '@phosphor-icons/react';
 
 const ProgressReport = ({ 
     getProgressData, 
@@ -12,9 +13,9 @@ const ProgressReport = ({
         <div className="min-h-screen bg-gradient-to-b from-amber-50 to-green-100 p-8">
             <div className="max-w-5xl mx-auto">
                 <div className="flex justify-between items-center mb-8">
-                    <h1 className="text-4xl font-bold text-green-800">Progress Report 📊</h1>
+                    <h1 className="text-4xl font-bold text-green-800"><ChartBar size={52} className="inline-block" weight="duotone" /> Progress Report</h1>
                     <button onClick={onClose} className="px-6 py-3 bg-green-600 text-white rounded-full hover:bg-green-700 transition-all transform hover:scale-105 font-bold">
-                        Back to Quiz
+                        <CaretCircleLeft size={32} className="inline-block" weight="duotone" /> Back to Quiz
                     </button>
                 </div>
                 {Object.keys(WORDS_BY_CATEGORY).map(categoryKey => {
@@ -22,11 +23,12 @@ const ProgressReport = ({
                     const { notAttempted, allCorrect, hasIncorrect, total } = getProgressData(categoryKey);
                     const percentComplete = calculatePercentComplete(allCorrect, total);
                     const stats = getCurrentStats();
+					const Icon = config.icon;
                     
                     return (
                         <div key={categoryKey} className="mb-8 bg-white rounded-3xl shadow-xl p-6 border-4 border-amber-200">
                             <div className="flex justify-between items-center mb-4">
-                                <h2 className="text-3xl font-bold text-green-800">{config.icon} {config.label}</h2>
+                                <h2 className="text-3xl font-bold text-green-800"><Icon size={32} className="inline-block" weight="duotone" /> {config.label}</h2>
                                 <div className="text-right">
                                     <div className="text-2xl font-bold text-green-700">{percentComplete}%</div>
                                     <div className="text-sm text-gray-600">{allCorrect.length}/{total} mastered</div>

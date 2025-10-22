@@ -8,13 +8,15 @@ const CategoryTabs = ({ selectedCategory, onSelectCategory, practiceMode }) => {
         <div className="max-w-3xl mx-auto flex gap-3 mb-6 mt-8">
             {Object.keys(WORDS_BY_CATEGORY).map(categoryKey => {
                 const config = CATEGORY_CONFIG[categoryKey];
+				const Icon = config.icon;
                 return (
                     <button 
                         key={categoryKey} 
                         onClick={() => onSelectCategory(categoryKey)} 
                         className={`flex-1 py-4 rounded-2xl text-xl font-bold transition-all transform hover:scale-105 border-4 ${selectedCategory === categoryKey ? 'bg-green-600 text-white border-green-700 shadow-lg' : 'bg-white text-green-800 border-green-300 hover:bg-green-50'}`}
                     >
-                        {config.icon} {config.label}
+						{/* can the config.icon */}
+                        <Icon size={32} className="inline-block" weight="duotone" /> {config.label}
                     </button>
                 );
             })}
