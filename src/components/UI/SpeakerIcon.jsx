@@ -31,7 +31,7 @@ const SpeakerIcon = ({ text, className = "" }) => {
 
         const utterance = new SpeechSynthesisUtterance(text);
         utterance.lang = 'fr-FR';
-        
+		utterance.rate = .35;
         if (voice) {
             utterance.voice = voice;
         }

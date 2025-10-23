@@ -207,7 +207,7 @@ const QuizHeader = ({
                                     : 'text-gray-300 hover:bg-white/5 hover:text-white'
                             }`}
                         >
-                            <ClipboardText size={32} className="inline-block" /> Quiz
+                            <ClipboardText size={32} className="inline-block" weight="duotone" /> Quiz
                         </button>
                         <button 
                             onClick={() => handleModeClick('flashcard')}
