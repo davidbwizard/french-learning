@@ -38,8 +38,8 @@ const QuizHeader = ({
             <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
                 <div className="relative flex h-20 items-center justify-between">
                     
-                    {/* Mobile menu button */}
-                    <div className="absolute inset-y-0 left-0 flex items-center sm:hidden">
+                    {/* Mobile menu button - LEFT SIDE */}
+                    <div className="flex items-center sm:hidden">
                         <button 
                             type="button" 
                             onClick={() => setShowMobileMenu(!showMobileMenu)}
@@ -48,20 +48,20 @@ const QuizHeader = ({
                         >
                             <span className="sr-only">Open main menu</span>
                             {showMobileMenu ? (
-                                <X size={28} weight="bold" />
+                                <X size={24} weight="bold" />
                             ) : (
-                                <Hamburger size={28} weight="bold" />
+                                <Hamburger size={24} weight="bold" />
                             )}
                         </button>
                     </div>
 
-                    {/* Logo Section */}
-                    <div className="flex flex-1 items-center justify-center sm:items-stretch sm:justify-start">
-                        <div className="flex items-center gap-3">
-                            <div className="bg-white/90 p-2.5 rounded-2xl shadow-lg transform hover:scale-110 transition-transform">
-                                <Brain size={40} weight="duotone" className="text-grade2-600" />
+                    {/* Logo Section - CENTER on mobile, LEFT on desktop */}
+                    <div className="flex flex-1 items-center justify-center sm:justify-start">
+                        <div className="flex items-center gap-2 sm:gap-3">
+                            <div className="bg-white/90 p-2 sm:p-2.5 rounded-2xl shadow-lg transform hover:scale-110 transition-transform">
+                                <Brain size={32} weight="duotone" className="text-grade2-600 sm:w-10 sm:h-10" />
                             </div>
-                            <span className="text-2xl font-bold text-white drop-shadow-lg">BrainBox</span>
+                            <span className="text-xl sm:text-2xl font-bold text-white drop-shadow-lg">BrainBox</span>
                         </div>
 
                         {/* Desktop Mode Buttons */}
@@ -93,19 +93,19 @@ const QuizHeader = ({
                     </div>
 
                     {/* Right Section - Sound & Profile */}
-                    <div className="absolute inset-y-0 right-0 flex items-center gap-3 pr-2 sm:static sm:inset-auto sm:ml-6 sm:pr-0">
+                    <div className="flex items-center gap-2 sm:gap-3">
                         
                         {/* Sound Toggle */}
                         <button 
                             type="button" 
                             onClick={onToggleSound}
-                            className="p-3 rounded-2xl bg-white/20 text-white hover:bg-white/30 transition-all transform hover:scale-110 backdrop-blur-sm"
+                            className="p-2.5 sm:p-3 rounded-2xl bg-white/20 text-white hover:bg-white/30 transition-all transform hover:scale-110 backdrop-blur-sm"
                         >
                             <span className="sr-only">Toggle sound</span>
                             {soundEnabled ? (
-                                <SpeakerHigh size={28} weight="duotone" />
+                                <SpeakerHigh size={24} weight="duotone" />
                             ) : (
-                                <SpeakerSimpleSlash size={28} weight="duotone" />
+                                <SpeakerSimpleSlash size={24} weight="duotone" />
                             )}
                         </button>
 
@@ -116,7 +116,7 @@ const QuizHeader = ({
                                     setShowProfileDropdown(!showProfileDropdown);
                                     setShowManageProfiles(false);
                                 }}
-                                className="flex items-center justify-center w-12 h-12 rounded-2xl bg-white text-grade1-600 font-bold text-lg hover:scale-110 transition-all shadow-lg"
+                                className="flex items-center justify-center w-11 h-11 sm:w-12 sm:h-12 rounded-2xl bg-white text-grade1-600 font-bold text-base sm:text-lg hover:scale-110 transition-all shadow-lg"
                             >
                                 <span className="sr-only">Open user menu</span>
                                 {getInitials(currentProfile?.name)}
