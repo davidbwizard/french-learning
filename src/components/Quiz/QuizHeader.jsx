@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
-import { Hamburger, ClipboardText, SpeakerHigh, SpeakerSimpleSlash, Cards, ChartBar, PlusSquare, PencilLine, PersonSimpleRun, X, Brain } from '@phosphor-icons/react'
-;
+import { Hamburger, ClipboardText, SpeakerHigh, SpeakerSimpleSlash, Cards, ChartBar, PlusSquare, PencilLine, PersonSimpleRun, X, Brain } from '@phosphor-icons/react';
 
 const QuizHeader = ({ 
     currentProfile, 
@@ -29,124 +28,127 @@ const QuizHeader = ({
     };
 
     const handleModeClick = (mode) => {
-
-		// if mode is equal to current mode, do nothing
-		if (mode === currentMode) {
-			return;
-		}
-
+        if (mode === currentMode) return;
         onModeChange(mode);
         setShowMobileMenu(false);
     };
 
     return (
-        <nav className="relative bg-green-600 after:pointer-events-none after:absolute after:inset-x-0 after:bottom-0 after:h-px after:bg-white/10 shadow-lg border-4 border-green-700">
-            <div className="mx-auto max-w-7xl px-2 sm:px-6 lg:px-8">
-                <div className="relative flex h-16 items-center justify-between">
+        <nav className="relative bg-gradient-to-r from-grade1-500 via-grade2-500 to-grade3-500 rounded-b-3xl shadow-2xl mb-8">
+            <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+                <div className="relative flex h-20 items-center justify-between">
+                    
                     {/* Mobile menu button */}
                     <div className="absolute inset-y-0 left-0 flex items-center sm:hidden">
                         <button 
                             type="button" 
                             onClick={() => setShowMobileMenu(!showMobileMenu)}
-                            className="relative inline-flex items-center justify-center rounded-md p-2 text-white hover:bg-white/5 hover:text-white focus:outline-2 focus:-outline-offset-1 focus:outline-indigo-500"
+                            className="relative inline-flex items-center justify-center rounded-2xl p-3 text-white hover:bg-white/20 backdrop-blur-sm transition-all"
                             aria-expanded={showMobileMenu}
                         >
-                            <span className="absolute -inset-0.5"></span>
                             <span className="sr-only">Open main menu</span>
                             {showMobileMenu ? (
-								<X size={32} className="inline-block" weight="duotone" />
+                                <X size={28} weight="bold" />
                             ) : (
-								<Hamburger size={32} className="inline-block" weight="duotone" />
+                                <Hamburger size={28} weight="bold" />
                             )}
                         </button>
                     </div>
 
-                    {/* Logo and nav links */}
+                    {/* Logo Section */}
                     <div className="flex flex-1 items-center justify-center sm:items-stretch sm:justify-start">
-                        <div className="flex shrink-0 items-center">
-                            {/* <img 
-                                src="/french-learning/images/logo.png" 
-                                alt="BrainBox" 
-                                className="h-8 w-auto" 
-                            /> */}
-							<Brain size={32} className="inline-block" weight="duotone" color="white"/>
-                            <span className="ml-2 text-white font-bold">BrainBox</span>
-                        </div>
-                        <div className="hidden sm:ml-6 sm:block">
-                            <div className="flex space-x-4">
-                                <button 
-                                    onClick={() => handleModeClick('quiz')}
-                                    className={`rounded-md px-3 py-2 text-sm font-medium ${
-                                        currentMode === 'quiz' 
-                                            ? 'bg-gray-950/50 text-white' 
-                                            : 'text-white hover:bg-white/5 hover:text-white'
-                                    }`}
-                                >
-                                    <ClipboardText size={32} className="inline-block" weight="duotone"/> Quiz
-                                </button>
-                                <button 
-                                    onClick={() => handleModeClick('flashcard')}
-                                    className={`rounded-md px-3 py-2 text-sm font-medium ${
-                                        currentMode === 'flashcard' 
-                                            ? 'bg-gray-950/50 text-white' 
-                                            : 'text-white hover:bg-white/5 hover:text-white'
-                                    }`}
-                                >
-                                    <Cards size={32} className="inline-block" weight="duotone" /> Flash Card
-                                </button>
+                        <div className="flex items-center gap-3">
+                            <div className="bg-white/90 p-2.5 rounded-2xl shadow-lg transform hover:scale-110 transition-transform">
+                                <Brain size={40} weight="duotone" className="text-grade2-600" />
                             </div>
+                            <span className="text-2xl font-bold text-white drop-shadow-lg">BrainBox</span>
+                        </div>
+
+                        {/* Desktop Mode Buttons */}
+                        <div className="hidden sm:ml-8 sm:flex sm:gap-3">
+                            <button 
+                                onClick={() => handleModeClick('quiz')}
+                                className={`flex items-center gap-2 px-6 py-3 rounded-2xl text-base font-semibold transition-all transform hover:scale-105 ${
+                                    currentMode === 'quiz' 
+                                        ? 'bg-white text-grade1-600 shadow-lg' 
+                                        : 'bg-white/20 text-white hover:bg-white/30 backdrop-blur-sm'
+                                }`}
+                            >
+                                <ClipboardText size={24} weight="duotone" />
+                                <span>Quiz</span>
+                            </button>
+                            
+                            <button 
+                                onClick={() => handleModeClick('flashcard')}
+                                className={`flex items-center gap-2 px-6 py-3 rounded-2xl text-base font-semibold transition-all transform hover:scale-105 ${
+                                    currentMode === 'flashcard' 
+                                        ? 'bg-white text-grade2-600 shadow-lg' 
+                                        : 'bg-white/20 text-white hover:bg-white/30 backdrop-blur-sm'
+                                }`}
+                            >
+                                <Cards size={24} weight="duotone" />
+                                <span>Flash Cards</span>
+                            </button>
                         </div>
                     </div>
 
-                    {/* Right side buttons */}
-                    <div className="absolute inset-y-0 right-0 flex items-center gap-2 pr-2 sm:static sm:inset-auto sm:ml-6 sm:pr-0">
-                        {/* Sound toggle button */}
+                    {/* Right Section - Sound & Profile */}
+                    <div className="absolute inset-y-0 right-0 flex items-center gap-3 pr-2 sm:static sm:inset-auto sm:ml-6 sm:pr-0">
+                        
+                        {/* Sound Toggle */}
                         <button 
                             type="button" 
                             onClick={onToggleSound}
-                            className="relative rounded-full p-1 text-white hover:text-white focus:outline-2 focus:outline-offset-2 focus:outline-indigo-500"
+                            className="p-3 rounded-2xl bg-white/20 text-white hover:bg-white/30 transition-all transform hover:scale-110 backdrop-blur-sm"
                         >
-                            <span className="absolute -inset-1.5"></span>
                             <span className="sr-only">Toggle sound</span>
-                            {soundEnabled ? <SpeakerHigh size={32} className="inline-block" weight="duotone" /> : <SpeakerSimpleSlash size={32} className="inline-block" weight="duotone"/>}
+                            {soundEnabled ? (
+                                <SpeakerHigh size={28} weight="duotone" />
+                            ) : (
+                                <SpeakerSimpleSlash size={28} weight="duotone" />
+                            )}
                         </button>
 
-                        {/* Profile dropdown */}
+                        {/* Profile Dropdown */}
                         <div className="relative">
                             <button 
                                 onClick={() => {
                                     setShowProfileDropdown(!showProfileDropdown);
                                     setShowManageProfiles(false);
                                 }}
-                                className="relative flex size-8 items-center justify-center rounded-full bg-indigo-600 text-sm font-semibold text-white hover:bg-indigo-500 focus:outline-2 focus:outline-offset-2 focus:outline-indigo-500"
+                                className="flex items-center justify-center w-12 h-12 rounded-2xl bg-white text-grade1-600 font-bold text-lg hover:scale-110 transition-all shadow-lg"
                             >
-                                <span className="absolute -inset-1.5"></span>
                                 <span className="sr-only">Open user menu</span>
                                 {getInitials(currentProfile?.name)}
                             </button>
 
-                            {/* Profile dropdown menu */}
+                            {/* Profile Dropdown Menu */}
                             {showProfileDropdown && (
-                                <div className="absolute right-0 z-10 mt-2 w-48 origin-top-right rounded-md bg-green-800 py-1 shadow-lg ring-1 ring-black/5 focus:outline-none">
+                                <div className="absolute right-0 z-10 mt-3 w-56 origin-top-right rounded-2xl bg-white py-2 shadow-2xl border-4 border-purple-200">
                                     <button
-                                        onClick={onShowProgress}
-                                        className="block w-full px-4 py-2 text-left text-sm text-gray-300 hover:bg-white/5 hover:text-white"
+                                        onClick={() => {
+                                            onShowProgress();
+                                            setShowProfileDropdown(false);
+                                        }}
+                                        className="flex items-center gap-3 w-full px-5 py-3 text-left text-base font-semibold text-gray-700 hover:bg-purple-50 transition-all"
                                     >
-                                        <ChartBar size={32} weight="duotone" className="inline-block"/> Progress
+                                        <ChartBar size={24} weight="duotone" className="text-purple-600" />
+                                        <span>View Progress</span>
                                     </button>
                                     <button
                                         onClick={handleManageProfilesClick}
-                                        className="block w-full px-4 py-2 text-left text-sm text-gray-300 hover:bg-white/5 hover:text-white"
+                                        className="flex items-center gap-3 w-full px-5 py-3 text-left text-base font-semibold text-gray-700 hover:bg-purple-50 transition-all"
                                     >
-                                        <PersonSimpleRun size={32} className="inline-block"/> Manage Profiles
+                                        <PersonSimpleRun size={24} weight="duotone" className="text-purple-600" />
+                                        <span>Switch Profile</span>
                                     </button>
                                 </div>
                             )}
 
-                            {/* Manage Profiles submenu */}
+                            {/* Manage Profiles Submenu */}
                             {showManageProfiles && (
-                                <div className="absolute right-0 z-20 mt-2 w-64 origin-top-right rounded-2xl bg-white shadow-2xl border-4 border-purple-200">
-                                    <div className="p-2">
+                                <div className="absolute right-0 z-20 mt-3 w-64 origin-top-right rounded-2xl bg-white shadow-2xl border-4 border-grade3-200 p-3">
+                                    <div className="space-y-2">
                                         {Object.values(profiles).map(profile => (
                                             <button 
                                                 key={profile.id} 
@@ -155,38 +157,41 @@ const QuizHeader = ({
                                                     setShowManageProfiles(false);
                                                     setShowProfileDropdown(false);
                                                 }}
-                                                className={`w-full text-left px-4 py-3 rounded-xl hover:bg-purple-100 transition-all font-semibold ${
-                                                    profile.id === currentProfileId ? 'bg-purple-200' : ''
+                                                className={`w-full text-left px-4 py-3 rounded-xl font-semibold text-lg transition-all transform hover:scale-105 ${
+                                                    profile.id === currentProfileId 
+                                                        ? 'bg-gradient-to-r from-grade3-400 to-grade3-500 text-white shadow-lg' 
+                                                        : 'bg-gray-100 text-gray-700 hover:bg-grade3-100'
                                                 }`}
                                             >
                                                 {profile.name} {profile.id === currentProfileId && '✓'}
                                             </button>
                                         ))}
+                                        
                                         {Object.keys(profiles).length < 3 ? (
-    <button 
-        onClick={() => {
-            onAddNewProfile();
-            setShowManageProfiles(false);
-            setShowProfileDropdown(false);
-        }}
-        className="w-full text-left px-4 py-3 rounded-xl hover:bg-green-100 transition-all font-semibold text-green-700 border-t-2 border-gray-200 mt-2"
-    >
-        <PlusSquare size={32} className="inline-block"/>
-        <span>Add</span>
-    </button>
-) : (
-    <button 
-        onClick={() => {
-            onAddNewProfile(); // This should probably call a different function
-            setShowManageProfiles(false);
-            setShowProfileDropdown(false);
-        }}
-        className="w-full text-left px-4 py-3 rounded-xl hover:bg-red-100 transition-all font-semibold text-red-700 border-t-2 border-gray-200 mt-2"
-    >
-        <PencilLine size={32} weight="duotone" className="inline-block"/>
-        <span>Remove</span>
-    </button>
-)}
+                                            <button 
+                                                onClick={() => {
+                                                    onAddNewProfile();
+                                                    setShowManageProfiles(false);
+                                                    setShowProfileDropdown(false);
+                                                }}
+                                                className="w-full flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-green-100 transition-all font-semibold text-lg text-green-700 border-t-2 border-gray-200 mt-2"
+                                            >
+                                                <PlusSquare size={28} weight="duotone" />
+                                                <span>Add New Profile</span>
+                                            </button>
+                                        ) : (
+                                            <button 
+                                                onClick={() => {
+                                                    onAddNewProfile();
+                                                    setShowManageProfiles(false);
+                                                    setShowProfileDropdown(false);
+                                                }}
+                                                className="w-full flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-red-100 transition-all font-semibold text-lg text-red-700 border-t-2 border-gray-200 mt-2"
+                                            >
+                                                <PencilLine size={28} weight="duotone" />
+                                                <span>Edit Profiles</span>
+                                            </button>
+                                        )}
                                     </div>
                                 </div>
                             )}
@@ -195,29 +200,32 @@ const QuizHeader = ({
                 </div>
             </div>
 
-            {/* Mobile menu */}
+            {/* Mobile Menu */}
             {showMobileMenu && (
-                <div className="sm:hidden">
-                    <div className="space-y-1 px-2 pt-2 pb-3">
+                <div className="sm:hidden border-t border-white/20">
+                    <div className="space-y-2 px-4 py-4">
                         <button 
                             onClick={() => handleModeClick('quiz')}
-                            className={`block w-full text-left rounded-md px-3 py-2 text-base font-medium ${
+                            className={`flex items-center gap-3 w-full text-left rounded-2xl px-4 py-3 text-base font-semibold transition-all ${
                                 currentMode === 'quiz'
-                                    ? 'bg-gray-950/50 text-white'
-                                    : 'text-gray-300 hover:bg-white/5 hover:text-white'
+                                    ? 'bg-white text-grade1-600 shadow-lg'
+                                    : 'bg-white/20 text-white hover:bg-white/30'
                             }`}
                         >
-                            <ClipboardText size={32} className="inline-block" weight="duotone" /> Quiz
+                            <ClipboardText size={24} weight="duotone" />
+                            <span>Quiz Mode</span>
                         </button>
+                        
                         <button 
                             onClick={() => handleModeClick('flashcard')}
-                            className={`block w-full text-left rounded-md px-3 py-2 text-base font-medium ${
+                            className={`flex items-center gap-3 w-full text-left rounded-2xl px-4 py-3 text-base font-semibold transition-all ${
                                 currentMode === 'flashcard'
-                                    ? 'bg-gray-950/50 text-white'
-                                    : 'text-gray-300 hover:bg-white/5 hover:text-white'
+                                    ? 'bg-white text-grade2-600 shadow-lg'
+                                    : 'bg-white/20 text-white hover:bg-white/30'
                             }`}
                         >
-                            <Cards size={32} className="inline-block" weight="duotone" /> Flash Card
+                            <Cards size={24} weight="duotone" />
+                            <span>Flash Cards</span>
                         </button>
                     </div>
                 </div>

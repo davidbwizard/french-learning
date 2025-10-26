@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
-import { WORDS_BY_CATEGORY, SETTINGS } from '../data/words';
+import { SETTINGS } from '../data/words';
 import { generateQuestion as generateQuestionUtil } from '../utils/questionGenerator';
 
-export const useQuizState = (selectedCategory, practiceMode) => {
+export const useQuizState = (selectedCategory, practiceMode, wordsByCategory) => {
     const [currentQuestion, setCurrentQuestion] = useState(null);
     const [choices, setChoices] = useState([]);
     const [selectedAnswer, setSelectedAnswer] = useState(null);
@@ -13,7 +13,7 @@ export const useQuizState = (selectedCategory, practiceMode) => {
     const generateQuestion = (category = selectedCategory, wordPool = null) => {
         const result = generateQuestionUtil(
             category, 
-            WORDS_BY_CATEGORY, 
+            wordsByCategory, 
             SETTINGS, 
             wordPool, 
             seenWordIds
@@ -46,7 +46,7 @@ export const useQuizState = (selectedCategory, practiceMode) => {
             // Generate next question with updated seen list
             const result = generateQuestionUtil(
                 category, 
-                WORDS_BY_CATEGORY, 
+                wordsByCategory, 
                 SETTINGS, 
                 wordPool, 
                 newSeenIds
@@ -77,7 +77,7 @@ export const useQuizState = (selectedCategory, practiceMode) => {
         
         const result = generateQuestionUtil(
             category, 
-            WORDS_BY_CATEGORY, 
+            wordsByCategory, 
             SETTINGS, 
             wordPool, 
             [] // Use empty array since we just reset

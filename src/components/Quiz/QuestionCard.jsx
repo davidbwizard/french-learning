@@ -14,17 +14,24 @@ const QuestionCard = ({
     onNextQuestion
 }) => {
     return (
-        <div className="max-w-3xl mx-auto bg-white rounded-3xl shadow-2xl p-12 mb-8 border-8 border-green-200">
+        <div className="mx-auto bg-gradient-to-br from-white via-amber-50 to-orange-50 rounded-3xl shadow-2xl p-8 sm:p-12 mb-8 border-4 border-grade1-300">
+        {/* <div className="max-w-3xl mx-auto bg-gradient-to-br from-white via-amber-50 to-orange-50 rounded-3xl shadow-2xl p-8 sm:p-12 mb-8 border-4 border-grade1-300"> */}
             <div className="text-center mb-8">
-                <p className="text-gray-600 text-lg mb-3">What does this mean?</p>
+                <p className="text-gray-600 text-xl mb-4 font-medium">What does this mean?</p>
+                
                 <div className="flex items-center justify-center gap-4 mb-6">
-                    <h2 className="text-5xl font-bold text-green-800">{questionText}</h2>
-                    <SpeakerIcon text={questionText} />
+                    <h2 className="text-6xl font-bold text-grade1-700">{questionText}</h2>
+                    <div className="transform hover:scale-110 transition-transform">
+                        <SpeakerIcon text={questionText} />
+                    </div>
                 </div>
+                
                 {currentQuestion && getCurrentStats()[currentQuestion.id] && (
-                    <p className="text-sm text-gray-500">
-                        Attempted: {getCurrentStats()[currentQuestion.id].attempts} times
-                    </p>
+                    <div className="inline-block bg-white/80 backdrop-blur-sm px-4 py-2 rounded-full">
+                        <p className="text-sm font-semibold text-gray-600">
+                            Attempted: {getCurrentStats()[currentQuestion.id].attempts} times
+                        </p>
+                    </div>
                 )}
             </div>
 
@@ -40,27 +47,28 @@ const QuestionCard = ({
                             key={index} 
                             onClick={() => !showResult && onAnswer(choice)} 
                             disabled={showResult} 
-                            className={`w-full p-6 rounded-2xl text-2xl font-bold transition-all transform hover:scale-105 border-4
-                                ${showCorrect ? 'bg-green-500 text-white border-green-600 scale-105' : ''}
-                                ${showWrong ? 'bg-red-400 text-white border-red-500' : ''}
-                                ${!showResult ? 'bg-amber-100 border-amber-300 hover:bg-amber-200 text-green-800' : ''}
-                                ${showResult && !isSelected && !isCorrect ? 'bg-gray-200 border-gray-300 text-gray-500' : ''}`}
+                            className={`w-full p-6 rounded-2xl text-2xl font-bold transition-all transform hover:scale-105 border-4 shadow-lg
+                                ${showCorrect ? 'bg-gradient-to-r from-success-500 to-success-600 text-white border-success-700 scale-105 animate-wiggle' : ''}
+                                ${showWrong ? 'bg-gradient-to-r from-error-400 to-error-500 text-white border-error-600 animate-wiggle' : ''}
+                                ${!showResult ? 'bg-white border-grade1-200 hover:bg-grade1-50 hover:border-grade1-400 text-grade1-800' : ''}
+                                ${showResult && !isSelected && !isCorrect ? 'bg-gray-100 border-gray-300 text-gray-400 opacity-50' : ''}`}
                         >
-                            {showCorrect && '🌟 '}
+                            {showCorrect && <span className="mr-2">🌟</span>}
                             {choice}
-                            {showWrong && ' ❌'}
+                            {showWrong && <span className="ml-2">❌</span>}
                         </button>
                     );
                 })}
             </div>
 
             {showResult && (
-                <div className="mt-8 text-center">
+                <div className="mt-8 text-center animate-pop">
                     <button 
                         onClick={onNextQuestion} 
-                        className="px-10 py-4 bg-green-600 text-white rounded-full text-2xl font-bold hover:bg-green-700 transition-all transform hover:scale-110 shadow-lg flex items-center gap-3 mx-auto"
+                        className="inline-flex items-center gap-3 px-10 py-5 bg-gradient-to-r from-grade1-500 to-grade1-600 hover:from-grade1-600 hover:to-grade1-700 text-white rounded-2xl text-2xl font-bold transition-all transform hover:scale-110 shadow-xl"
                     >
-                        Next Question <RotateCcw />
+                        <span>Next Question</span>
+                        <RotateCcw size={28} />
                     </button>
                 </div>
             )}

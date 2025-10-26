@@ -1,13 +1,14 @@
 import React from 'react';
 import { Trash } from '../UI/Icons';
 import { calculateOverallProgress } from '../../utils/statsCalculator';
-import { WORDS_BY_CATEGORY } from '../../data/words';
+// import { WORDS_BY_CATEGORY } from '../../data/words';
 
 const ProfileSelectionScreen = ({ 
     profiles, 
     onSelectProfile, 
     onCreateProfile, 
-    onDeleteProfile 
+    onDeleteProfile,
+	wordsByCategory
 }) => {
     const profileCount = Object.keys(profiles).length;
     const canCreateProfile = profileCount < 3;
@@ -26,7 +27,7 @@ const ProfileSelectionScreen = ({
                 <div className="grid gap-6">
                     {Object.values(profiles).map(profile => {
                         const stats = profile.stats || {};
-                        const progressPercent = calculateOverallProgress(WORDS_BY_CATEGORY, stats);
+                        const progressPercent = calculateOverallProgress(wordsByCategory, stats);
                         
                         return (
                             <div key={profile.id} className="bg-white rounded-3xl shadow-xl p-6 border-4 border-green-200 flex justify-between items-center hover:scale-105 transition-transform">

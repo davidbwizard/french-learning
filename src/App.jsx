@@ -1,5 +1,5 @@
+import { loadAllWords, WORDS_BY_CATEGORY } from './data/words';
 import React, { useState, useEffect } from 'react';
-import { WORDS_BY_CATEGORY } from './data/words';
 import { playSound } from './utils/sounds';
 import { checkAnswer } from './utils/questionGenerator';
 import { getProgressDataForCategory as getProgressDataForCategoryUtil, updateWordStats as updateWordStatsUtil } from './utils/statsCalculator';
@@ -20,13 +20,30 @@ import { useProfiles } from './hooks/useProfiles';
 import { useQuizState } from './hooks/useQuizState';
 
 const FrenchQuiz = () => {
-	const firstCategory = Object.keys(WORDS_BY_CATEGORY)[0];
+	const [wordsLoaded, setWordsLoaded] = useState(false);
+	const firstCategory = Object.keys(WORDS_BY_CATEGORY)[0] || 'grade1';
 	const [selectedCategory, setSelectedCategory] = useState(firstCategory);
 	const [practiceMode, setPracticeMode] = useState(null);
 	const [showProgress, setShowProgress] = useState(false);
 	const [showProfileDropdown, setShowProfileDropdown] = useState(false);
 	const [soundEnabled, setSoundEnabled] = useState(true);
 	const [currentMode, setCurrentMode] = useState('quiz'); // 'quiz' or 'flashcard'
+    console.log('🔍 Render state:', { 
+        wordsLoaded, 
+        firstCategory, 
+        selectedCategory,
+        hasWords: Object.keys(WORDS_BY_CATEGORY).length 
+    });
+
+
+	    // Load words on mount
+		useEffect(() => {
+			const initializeWords = async () => {
+				await loadAllWords();
+				setWordsLoaded(true);
+			};
+			initializeWords();
+		}, []);
 
 	const {
 		currentQuestion,
@@ -41,7 +58,7 @@ const FrenchQuiz = () => {
 		nextQuestion,
 		resetSession,
 		resetAndRestart
-	} = useQuizState(selectedCategory, practiceMode);
+	} = useQuizState(selectedCategory, practiceMode, WORDS_BY_CATEGORY);
 
 	const {
 		profiles,
@@ -111,17 +128,36 @@ const FrenchQuiz = () => {
     };
 
     useEffect(() => {
-        if (currentProfileId) generateQuestion();
-    }, [currentProfileId]);
+		console.log('🎯 Profile effect:', { currentProfileId, wordsLoaded });
+        if (currentProfileId && wordsLoaded) {
+			generateQuestion();
+			console.log('🎲 Calling generateQuestion()');
+		}
+    }, [currentProfileId, wordsLoaded]);
+
+	    // Add loading screen BEFORE profile selection
+		if (!wordsLoaded) {
+			console.log('⏳ Showing loading screen');
+			return (
+				<div className="min-h-screen bg-gradient-to-b from-amber-50 to-green-100 flex items-center justify-center">
+					<div className="text-center">
+						<div className="text-4xl mb-4">🌱</div>
+						<div className="text-xl font-semibold text-green-800">Loading words...</div>
+					</div>
+				</div>
+			);
+		}
 
     // Profile selection screen
     if (!currentProfileId) {
+		console.log('👤 Showing profile selection screen');
 		return (
 			<ProfileSelectionScreen
 				profiles={profiles}
 				onSelectProfile={switchProfile}
 				onCreateProfile={createProfile}
 				onDeleteProfile={deleteProfile}
+				wordsByCategory={WORDS_BY_CATEGORY}
 			/>
 		);
 	}
@@ -134,6 +170,7 @@ const FrenchQuiz = () => {
 				getCurrentStats={getCurrentStats}
 				onClose={() => setShowProgress(false)}
 				onStartPracticeMode={startPracticeMode}
+				wordsByCategory={WORDS_BY_CATEGORY}
 			/>
 		);
 	}
@@ -144,7 +181,7 @@ const FrenchQuiz = () => {
     const hasHardWords = progressData.hasIncorrect.length > 0;
 
     return (
-        <div className="min-h-screen bg-gradient-to-b from-amber-50 to-green-100">
+        <div className="min-h-screen bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50">
             <div className="mx-auto">
 				<QuizHeader
 					currentProfile={currentProfile}
@@ -165,52 +202,60 @@ const FrenchQuiz = () => {
 					practiceMode={practiceMode} 
 					onExit={exitPracticeMode} 
 				/>
+				
+				<div className="max-w-7xl mx-auto grid grid-cols-1 sm:grid-cols-[minmax(150px,350px)_minmax(450px,1fr)] gap-3">
+					<CategoryTabs
+						selectedCategory={selectedCategory}
+						onSelectCategory={handleCategoryChange}
+						practiceMode={practiceMode}
+						wordsByCategory={WORDS_BY_CATEGORY}
+					/>
 
-				<CategoryTabs
-					selectedCategory={selectedCategory}
-					onSelectCategory={handleCategoryChange}
-					practiceMode={practiceMode}
-				/>
+					<div className="px-4">
+						{currentQuestion && currentMode === 'quiz' && (
+							<QuestionCard
+								questionText={questionText}
+								currentQuestion={currentQuestion}
+								getCurrentStats={getCurrentStats}
+								choices={choices}
+								selectedAnswer={selectedAnswer}
+								correctAnswer={correctAnswer}
+								showResult={showResult}
+								onAnswer={handleAnswer}
+								onNextQuestion={() => nextQuestion(
+									practiceMode ? practiceMode.category : selectedCategory, 
+									practiceMode ? practiceMode.words : null
+								)}
+							/>
+						)}
 
-                {currentQuestion && currentMode === 'quiz' && (
-                    <QuestionCard
-                        questionText={questionText}
-                        currentQuestion={currentQuestion}
-                        getCurrentStats={getCurrentStats}
-                        choices={choices}
-                        selectedAnswer={selectedAnswer}
-                        correctAnswer={correctAnswer}
-                        showResult={showResult}
-                        onAnswer={handleAnswer}
-                        onNextQuestion={() => nextQuestion(
-                            practiceMode ? practiceMode.category : selectedCategory, 
-                            practiceMode ? practiceMode.words : null
-                        )}
-                    />
-                )}
+						{currentQuestion && currentMode === 'flashcard' && (
+							<FlashCard
+								questionText={questionText}
+								answerText={correctAnswer}
+								currentQuestion={currentQuestion}
+								onNextCard={() => nextQuestion(
+									practiceMode ? practiceMode.category : selectedCategory, 
+									practiceMode ? practiceMode.words : null
+								)}
+							/>
+						)}
 
-                {currentQuestion && currentMode === 'flashcard' && (
-                    <FlashCard
-                        questionText={questionText}
-                        answerText={correctAnswer}
-                        currentQuestion={currentQuestion}
-                        onNextCard={() => nextQuestion(
-                            practiceMode ? practiceMode.category : selectedCategory, 
-                            practiceMode ? practiceMode.words : null
-                        )}
-                    />
-                )}
+						<CongratsModal
+							isOpen={sessionComplete}
+							onClose={handleCloseModal}
+							onPracticeHardWords={handlePracticeHardWords}
+							onTryAgain={handleTryAgain}
+							hasHardWords={hasHardWords}
+							isPracticeMode={!!practiceMode}
+						/>
+					</div>
 
-                <CongratsModal
-                    isOpen={sessionComplete}
-                    onClose={handleCloseModal}
-                    onPracticeHardWords={handlePracticeHardWords}
-                    onTryAgain={handleTryAgain}
-                    hasHardWords={hasHardWords}
-                    isPracticeMode={!!practiceMode}
-                />
+				</div>
 
-                <AnimalFooter />
+				
+
+                {/* <AnimalFooter /> */}
             </div>
         </div>
     );
