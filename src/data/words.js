@@ -32,7 +32,7 @@ export const loadAllWords = async () => {
         
         for (const category of categories) {
             try {
-                const response = await fetch(`/data/${category}.json`, {
+                const response = await fetch(`./data/${category}.json`, {
                     cache: 'force-cache' // ✅ Use browser's HTTP cache
                 });
                 if (!response.ok) {
