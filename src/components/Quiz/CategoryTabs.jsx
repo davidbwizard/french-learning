@@ -160,27 +160,26 @@ const CategoryTabs = ({
                                     </div>
                                     
                                     <div className="flex items-center gap-2">
-                                        {isSelected && (
-                                            <div className="w-3 h-3 bg-white rounded-full shadow-lg animate-pulse"></div>
-                                        )}
-                                        <button
-                                            onClick={(e) => handleArrowClick(gradeKey, e)}
-                                            disabled={selectedGrade !== gradeKey}
-                                            className={`p-1 rounded transition-colors ${
-                                                selectedGrade === gradeKey 
-                                                    ? 'hover:bg-white/20 cursor-pointer' 
-                                                    : 'opacity-50 cursor-not-allowed'
-                                            }`}
-                                        >
-                                            <div className="transition-transform duration-200">
-                                                {isExpanded ? (
-                                                    <CaretDown size={20} weight="bold" />
-                                                ) : (
-                                                    <CaretRight size={20} weight="bold" />
-                                                )}
-                                            </div>
-                                        </button>
-                                    </div>
+										{isSelected && (
+											<div className="w-3 h-3 bg-white rounded-full shadow-lg animate-pulse"></div>
+										)}
+										<div
+											onClick={(e) => handleArrowClick(gradeKey, e)}
+											className={`p-1 rounded transition-colors ${
+												selectedGrade === gradeKey 
+													? 'hover:bg-white/20 cursor-pointer' 
+													: 'opacity-50 cursor-not-allowed'
+											}`}
+										>
+											<div className="transition-transform duration-200">
+												{isExpanded ? (
+													<CaretDown size={20} weight="bold" />
+												) : (
+													<CaretRight size={20} weight="bold" />
+												)}
+											</div>
+										</div>
+									</div>
                                 </div>
                             </button>
                             
@@ -272,27 +271,26 @@ const CategoryTabs = ({
                                         </div>
                                         
                                         <div className="flex items-center gap-1">
-                                            {isSelected && (
-                                                <div className="w-2.5 h-2.5 bg-white rounded-full shadow-lg"></div>
-                                            )}
-                                            <button
-                                                onClick={(e) => handleArrowClick(gradeKey, e)}
-                                                disabled={selectedGrade !== gradeKey}
-                                                className={`p-1 rounded transition-colors ${
-                                                    selectedGrade === gradeKey 
-                                                        ? 'hover:bg-white/20 cursor-pointer' 
-                                                        : 'opacity-50 cursor-not-allowed'
-                                                }`}
-                                            >
-                                                <div className="transition-transform duration-200">
-                                                    {isExpanded ? (
-                                                        <CaretDown size={16} weight="bold" />
-                                                    ) : (
-                                                        <CaretRight size={16} weight="bold" />
-                                                    )}
-                                                </div>
-                                            </button>
-                                        </div>
+											{isSelected && (
+												<div className="w-2.5 h-2.5 bg-white rounded-full shadow-lg"></div>
+											)}
+											<div
+												onClick={(e) => handleArrowClick(gradeKey, e)}
+												className={`p-1 rounded transition-colors ${
+													selectedGrade === gradeKey 
+														? 'hover:bg-white/20 cursor-pointer' 
+														: 'opacity-50 cursor-not-allowed'
+												}`}
+											>
+												<div className="transition-transform duration-200">
+													{isExpanded ? (
+														<CaretDown size={16} weight="bold" />
+													) : (
+														<CaretRight size={16} weight="bold" />
+													)}
+												</div>
+											</div>
+										</div>
                                     </div>
                                 </button>
                             );
