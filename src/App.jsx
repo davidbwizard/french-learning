@@ -1,5 +1,5 @@
-import { loadAllWords, WORDS_BY_CATEGORY } from './data/words';
-import React, { useState, useEffect } from 'react';
+import { loadAllWords, WORDS_BY_CATEGORY, getWordsForCategory } from './data/words';
+import React, { useState, useEffect, useMemo } from 'react';
 import { playSound } from './utils/sounds';
 import { checkAnswer } from './utils/questionGenerator';
 import { getProgressDataForCategory as getProgressDataForCategoryUtil, updateWordStats as updateWordStatsUtil } from './utils/statsCalculator';
@@ -22,28 +22,50 @@ import { useQuizState } from './hooks/useQuizState';
 const FrenchQuiz = () => {
 	const [wordsLoaded, setWordsLoaded] = useState(false);
 	const firstCategory = Object.keys(WORDS_BY_CATEGORY)[0] || 'grade1';
-	const [selectedCategory, setSelectedCategory] = useState(firstCategory);
+	const [selectedGrade, setSelectedGrade] = useState(firstCategory); // "grade1", "grade2", "grade3"
+	const [selectedCategory, setSelectedCategory] = useState(null);    // null or category ID like "essential-1"
 	const [practiceMode, setPracticeMode] = useState(null);
 	const [showProgress, setShowProgress] = useState(false);
 	const [showProfileDropdown, setShowProfileDropdown] = useState(false);
 	const [soundEnabled, setSoundEnabled] = useState(true);
 	const [currentMode, setCurrentMode] = useState('quiz'); // 'quiz' or 'flashcard'
-    console.log('🔍 Render state:', { 
-        wordsLoaded, 
-        firstCategory, 
-        selectedCategory,
-        hasWords: Object.keys(WORDS_BY_CATEGORY).length 
-    });
+	
+	// Load words on mount
+	useEffect(() => {
+		const initializeWords = async () => {
+			await loadAllWords();
+			setWordsLoaded(true);
+		};
+		initializeWords();
+	}, []);
 
+	// Get current word pool based on category filter
+	const getCurrentWords = () => {
+		if (selectedCategory) {
+			return getWordsForCategory(selectedGrade, selectedCategory);
+		}
+		return WORDS_BY_CATEGORY[selectedGrade] || [];
+	};
 
-	    // Load words on mount
-		useEffect(() => {
-			const initializeWords = async () => {
-				await loadAllWords();
-				setWordsLoaded(true);
-			};
-			initializeWords();
-		}, []);
+	// Build wordsByCategory object for useQuizState - memoized so it updates reactively
+	const wordsByCategory = useMemo(() => {
+		// Don't compute until words are loaded
+		if (!wordsLoaded || Object.keys(WORDS_BY_CATEGORY).length === 0) {
+			return {};
+		}
+		
+		if (selectedCategory) {
+			// When filtering by category, pass only those words
+			const filteredWords = getCurrentWords();
+			if (!filteredWords || filteredWords.length === 0) {
+				console.warn('No words found for category:', selectedCategory);
+				return WORDS_BY_CATEGORY; // Fallback to all words
+			}
+			return { [selectedGrade]: filteredWords };
+		}
+		// When no category filter, pass all words
+		return WORDS_BY_CATEGORY;
+	}, [selectedCategory, selectedGrade, wordsLoaded]);
 
 	const {
 		currentQuestion,
@@ -58,7 +80,7 @@ const FrenchQuiz = () => {
 		nextQuestion,
 		resetSession,
 		resetAndRestart
-	} = useQuizState(selectedCategory, practiceMode, WORDS_BY_CATEGORY);
+	} = useQuizState(selectedGrade, practiceMode, wordsByCategory);
 
 	const {
 		profiles,
@@ -78,78 +100,103 @@ const FrenchQuiz = () => {
 		
 		const wordId = currentQuestion.id;
 		const currentStats = getCurrentStats();
-		const category = practiceMode ? practiceMode.category : selectedCategory;
+		const category = practiceMode ? practiceMode.category : selectedGrade;
 		const newStats = updateWordStatsUtil(currentStats, wordId, isCorrect, category);
 		updateCurrentStats(newStats);
 		playSound(isCorrect ? 'correct' : 'wrong', soundEnabled);
 	};
 
-    const handleCategoryChange = (category) => {
-        setSelectedCategory(category);
-        resetAndRestart(category);
-    };
-    
-    const handleModeChange = (mode) => {
-        setCurrentMode(mode);
-        resetAndRestart(selectedCategory, practiceMode ? practiceMode.words : null);
-    };
-
-	const getProgressData = (category) => {
-		const stats = getCurrentStats();
-		return getProgressDataForCategoryUtil(category, WORDS_BY_CATEGORY, stats);
+	const handleGradeChange = (grade) => {
+		if (grade === selectedGrade) {
+			return;
+		}
+		setSelectedGrade(grade);
+		setSelectedCategory(null); // Reset category when grade changes
+		resetAndRestart(grade);
 	};
 
-    const startPracticeMode = (category, words) => {
-        setPracticeMode({ category, words });
-        setShowProgress(false);
-        resetAndRestart(category, words);
-    };
+	const handleCategoryChange = (categoryId) => {
+		if (categoryId === selectedCategory) {
+			return;
+		}
+		setSelectedCategory(categoryId);
+	};
 
-    const exitPracticeMode = () => {
-        setPracticeMode(null);
-        resetAndRestart(selectedCategory);
-    };
-
-    const handleTryAgain = () => {
-        const category = practiceMode ? practiceMode.category : selectedCategory;
-        const wordPool = practiceMode ? practiceMode.words : null;
-        resetAndRestart(category, wordPool);
-    };
+	// NEW: Clear category filter and return to all words
+	const handleClearCategoryFilter = () => {
+		setSelectedCategory(null);
+		resetAndRestart(selectedGrade);
+	};
     
-    const handleCloseModal = () => {
-        resetSession();
-    };
+	const handleModeChange = (mode) => {
+		setCurrentMode(mode);
+		resetAndRestart(selectedGrade, practiceMode ? practiceMode.words : null);
+	};
 
-    const handlePracticeHardWords = () => {
-        const progressData = getProgressData(selectedCategory);
-        if (progressData.hasIncorrect.length > 0) {
-            startPracticeMode(selectedCategory, progressData.hasIncorrect);
-        }
-    };
+	const getProgressData = () => {
+		if (!wordsLoaded || Object.keys(WORDS_BY_CATEGORY).length === 0) {
+			return { notAttempted: [], allCorrect: [], hasIncorrect: [], total: 0 };
+		}
+		const stats = getCurrentStats();
+		const gradeToUse = practiceMode ? practiceMode.category : selectedGrade;
+		return getProgressDataForCategoryUtil(gradeToUse, WORDS_BY_CATEGORY, stats);
+	};
 
-    useEffect(() => {
-		console.log('🎯 Profile effect:', { currentProfileId, wordsLoaded });
-        if (currentProfileId && wordsLoaded) {
+	const startPracticeMode = (category, words) => {
+		setPracticeMode({ category, words });
+		setShowProgress(false);
+		resetAndRestart(category, words);
+	};
+
+	const exitPracticeMode = () => {
+		setPracticeMode(null);
+		resetAndRestart(selectedGrade);
+	};
+
+	const handleTryAgain = () => {
+		const category = practiceMode ? practiceMode.category : selectedGrade;
+		const wordPool = practiceMode ? practiceMode.words : null;
+		resetAndRestart(category, wordPool);
+	};
+    
+	const handleCloseModal = () => {
+		resetSession();
+	};
+
+	const handlePracticeHardWords = () => {
+		const progressData = getProgressData();
+		if (progressData.hasIncorrect.length > 0) {
+			startPracticeMode(selectedGrade, progressData.hasIncorrect);
+		}
+	};
+
+	useEffect(() => {
+		if (currentProfileId && wordsLoaded) {
 			generateQuestion();
-			console.log('🎲 Calling generateQuestion()');
 		}
-    }, [currentProfileId, wordsLoaded]);
+	}, [currentProfileId, wordsLoaded]);
 
-	    // Add loading screen BEFORE profile selection
-		if (!wordsLoaded) {
-			console.log('⏳ Showing loading screen');
-			return (
-				<div className="min-h-screen bg-gradient-to-b from-amber-50 to-green-100 flex items-center justify-center">
-					<div className="text-center">
-						<div className="text-4xl mb-4">🌱</div>
-						<div className="text-xl font-semibold text-green-800">Loading words...</div>
-					</div>
+	// Reset quiz when category filter changes (but not when entering/exiting practice mode)
+	useEffect(() => {
+		if (currentProfileId && wordsLoaded && !practiceMode) {
+			resetAndRestart(selectedGrade);
+		}
+	}, [selectedCategory]);
+
+	// Add loading screen BEFORE profile selection
+	if (!wordsLoaded) {
+		return (
+			<div className="min-h-screen bg-gradient-to-b from-amber-50 to-green-100 flex items-center justify-center">
+				<div className="text-center">
+					<div className="text-4xl mb-4">🌱</div>
+					<div className="text-xl font-semibold text-green-800">Loading words...</div>
 				</div>
-			);
-		}
+			</div>
+		);
+	}
 
-    // Profile selection screen
-    if (!currentProfileId) {
+	// Profile selection screen
+	if (!currentProfileId) {
 		console.log('👤 Showing profile selection screen');
 		return (
 			<ProfileSelectionScreen
@@ -162,11 +209,10 @@ const FrenchQuiz = () => {
 		);
 	}
 
-    // Progress screen
+	// Progress screen
 	if (showProgress) {
 		return (
 			<ProgressReport
-				getProgressData={getProgressData}
 				getCurrentStats={getCurrentStats}
 				onClose={() => setShowProgress(false)}
 				onStartPracticeMode={startPracticeMode}
@@ -175,14 +221,14 @@ const FrenchQuiz = () => {
 		);
 	}
 
-    if (!currentQuestion && !sessionComplete) return null;
+	if (!currentQuestion && !sessionComplete) return null;
 
-    const progressData = getProgressData(practiceMode ? practiceMode.category : selectedCategory);
-    const hasHardWords = progressData.hasIncorrect.length > 0;
+	const progressData = getProgressData();
+	const hasHardWords = progressData.hasIncorrect.length > 0;
 
-    return (
-        <div className="min-h-screen bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50">
-            <div className="mx-auto">
+	return (
+		<div className="min-h-screen bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50">
+			<div className="mx-auto">
 				<QuizHeader
 					currentProfile={currentProfile}
 					profiles={profiles}
@@ -205,10 +251,12 @@ const FrenchQuiz = () => {
 				
 				<div className="max-w-7xl mx-auto grid grid-cols-1 sm:grid-cols-[minmax(150px,350px)_minmax(450px,1fr)] gap-3">
 					<CategoryTabs
+						selectedGrade={selectedGrade}
+						onSelectGrade={handleGradeChange}
 						selectedCategory={selectedCategory}
 						onSelectCategory={handleCategoryChange}
+						onClearCategory={handleClearCategoryFilter}
 						practiceMode={practiceMode}
-						wordsByCategory={WORDS_BY_CATEGORY}
 					/>
 
 					<div className="px-4">
@@ -223,7 +271,7 @@ const FrenchQuiz = () => {
 								showResult={showResult}
 								onAnswer={handleAnswer}
 								onNextQuestion={() => nextQuestion(
-									practiceMode ? practiceMode.category : selectedCategory, 
+									selectedGrade,
 									practiceMode ? practiceMode.words : null
 								)}
 							/>
@@ -235,7 +283,7 @@ const FrenchQuiz = () => {
 								answerText={correctAnswer}
 								currentQuestion={currentQuestion}
 								onNextCard={() => nextQuestion(
-									practiceMode ? practiceMode.category : selectedCategory, 
+									selectedGrade,
 									practiceMode ? practiceMode.words : null
 								)}
 							/>
@@ -250,15 +298,12 @@ const FrenchQuiz = () => {
 							isPracticeMode={!!practiceMode}
 						/>
 					</div>
-
 				</div>
 
-				
-
-                {/* <AnimalFooter /> */}
-            </div>
-        </div>
-    );
+				{/* <AnimalFooter /> */}
+			</div>
+		</div>
+	);
 };
 
 export default FrenchQuiz;

@@ -1,5 +1,8 @@
 import { Leaf, Tree, TreePalm } from '@phosphor-icons/react';
 
+const basePath = import.meta.env.BASE_URL;
+console.log('basePath', basePath);
+
 // Category configuration - Easy to add new categories!
 const CATEGORY_CONFIG = {
     grade1: { label: "Grade 1", icon: Leaf },
@@ -9,17 +12,16 @@ const CATEGORY_CONFIG = {
 
 // This will be populated by loadAllWords()
 let WORDS_BY_CATEGORY = {};
-let isLoading = false; // Add this flag
-let loadPromise = null; // Cache the promise
+let CATEGORIES_BY_GRADE = {}; // NEW
+let isLoading = false;
+let loadPromise = null;
 
 // Load all category data from JSON files
 export const loadAllWords = async () => {
-    // If already loaded, return immediately
     if (Object.keys(WORDS_BY_CATEGORY).length > 0) {
-        return WORDS_BY_CATEGORY;
+        return { words: WORDS_BY_CATEGORY, categories: CATEGORIES_BY_GRADE };
     }
     
-    // If currently loading, return the same promise
     if (isLoading && loadPromise) {
         return loadPromise;
     }
@@ -27,139 +29,74 @@ export const loadAllWords = async () => {
     isLoading = true;
     
     loadPromise = (async () => {
-        const categories = Object.keys(CATEGORY_CONFIG);
+        const grades = Object.keys(CATEGORY_CONFIG);
         const wordData = {};
+        const categoryData = {};
         
-        for (const category of categories) {
+        for (const gradeKey of grades) {
             try {
-                const response = await fetch(`./data/${category}.json`, {
-                    cache: 'force-cache' // ✅ Use browser's HTTP cache
+                const response = await fetch(`${basePath}data/${gradeKey}.json`, {
+                    cache: 'force-cache'
                 });
                 if (!response.ok) {
-                    throw new Error(`Failed to load ${category}`);
+                    throw new Error(`Failed to load ${gradeKey}`);
                 }
-                wordData[category] = await response.json();
+                
+                const data = await response.json();
+                
+                // NEW: Check if it's the new structure (with categories)
+                if (data.categories && Array.isArray(data.categories)) {
+                    // Store categories
+                    categoryData[gradeKey] = data.categories;
+                    
+                    // Flatten words for backward compatibility
+                    wordData[gradeKey] = data.categories.flatMap(cat => cat.words);
+                } else {
+                    // OLD: Fallback for old structure (flat array)
+                    wordData[gradeKey] = data;
+                    categoryData[gradeKey] = [{
+                        id: `essential-${data.grade || gradeKey}`,
+                        name: "Mots Essentiels",
+                        nameEnglish: "Essential Words",
+                        icon: "BookOpen",
+                        unlocked: true,
+                        words: data
+                    }];
+                }
             } catch (error) {
-                console.error(`Error loading ${category}:`, error);
-                wordData[category] = [];
+                console.error(`Error loading ${gradeKey}:`, error);
+                wordData[gradeKey] = [];
+                categoryData[gradeKey] = [];
             }
         }
         
         WORDS_BY_CATEGORY = wordData;
+        CATEGORIES_BY_GRADE = categoryData;
         isLoading = false;
-        return wordData;
+        
+        return { words: wordData, categories: categoryData };
     })();
     
     return loadPromise;
 };
 
-// Word data organized by category
-// const WORDS_BY_CATEGORY = {
-//     grade1: [
-//         { id: 67, french: "un", english: "one" },
-//         { id: 68, french: "une", english: "one" },
-//         { id: 69, french: "elle", english: "she" },
-//         { id: 70, french: "il y a", english: "there is" },
-//         { id: 71, french: "et", english: "and" },
-//         { id: 72, french: "j'ai", english: "I have" },
-//         { id: 73, french: "j'aime", english: "I like" },
-//         { id: 74, french: "les", english: "the" },
-//         { id: 75, french: "des", english: "some" },
-//         { id: 76, french: "avec", english: "with" },
-//         { id: 77, french: "c'est", english: "it is" },
-//         { id: 78, french: "est", english: "is" },
-//         { id: 79, french: "qui", english: "who" },
-//         { id: 80, french: "que", english: "that" },
-//         { id: 81, french: "oui", english: "yes" },
-//         { id: 82, french: "ici", english: "here" },
-//         { id: 83, french: "voici", english: "here is" },
-//         { id: 84, french: "chez", english: "at" },
-//         { id: 85, french: "aussi", english: "also" },
-//         { id: 86, french: "dans", english: "in" },
-//         { id: 87, french: "mange", english: "eat" },
-//         { id: 88, french: "je fais", english: "I do" },
-//         { id: 89, french: "je vois", english: "I see" },
-//         { id: 90, french: "je peux", english: "I can" },
-//         { id: 91, french: "je veux", english: "I want" },
-//         { id: 92, french: "je viens", english: "I come" },
-//         { id: 93, french: "je suis", english: "I am" },
-//         { id: 94, french: "est-ce que", english: "question word" },
-//         { id: 95, french: "parce-que", english: "because" },
-//         { id: 96, french: "beaucoup", english: "a lot" },
-//         { id: 97, french: "merci", english: "thank you" },
-//         { id: 98, french: "regarde", english: "look" },
-//     ],
-//     grade2: [
-//         { id: 35, french: "six", english: "six" },
-//         { id: 36, french: "dix", english: "ten" },
-//         { id: 37, french: "sept", english: "seven" },
-//         { id: 38, french: "huit", english: "eight" },
-//         { id: 39, french: "quatre", english: "four" },
-//         { id: 40, french: "cinq", english: "five" },
-//         { id: 41, french: "combien", english: "how many" },
-//         { id: 42, french: "dehors", english: "outside" },
-//         { id: 43, french: "aujourd'hui", english: "today" },
-//         { id: 44, french: "demain", english: "tomorrow" },
-//         { id: 45, french: "un homme", english: "a man" },
-//         { id: 46, french: "une femme", english: "a woman" },
-//         { id: 47, french: "le fils", english: "the son" },
-//         { id: 48, french: "la fille", english: "the daughter" },
-//         { id: 49, french: "une famille", english: "a family" },
-//         { id: 50, french: "quand", english: "when" },
-//         { id: 51, french: "pourquoi", english: "why" },
-//         { id: 52, french: "quelque chose", english: "something" },
-//         { id: 53, french: "il cherche", english: "he searches" },
-//         { id: 54, french: "j'ai faim", english: "I'm hungry" },
-//         { id: 55, french: "le soleil", english: "the sun" },
-//         { id: 56, french: "une feuille", english: "a leaf" },
-//         { id: 57, french: "maintenant", english: "now" },
-//         { id: 58, french: "l'heure", english: "the time" },
-//         { id: 59, french: "heureux", english: "happy" },
-//         { id: 60, french: "heureuse", english: "happy" },
-//         { id: 61, french: "les yeux", english: "the eyes" },
-//         { id: 62, french: "l'œil", english: "the eye" },
-//         { id: 63, french: "derrière", english: "behind" },
-//         { id: 64, french: "le coin", english: "the corner" },
-//         { id: 65, french: "jusqu'à", english: "until" },
-//         { id: 66, french: "presque", english: "almost" },
-//     ],
-//     grade3: [
-//         { id: 1, french: "à propos", english: "about" },
-//         { id: 2, french: "à travers", english: "through" },
-//         { id: 3, french: "au dessus", english: "above" },
-//         { id: 4, french: "au dessous", english: "below" },
-//         { id: 5, french: "aussitôt", english: "immediately" },
-//         { id: 6, french: "automne", english: "autumn" },
-//         { id: 7, french: "besoin", english: "need" },
-//         { id: 8, french: "bientôt", english: "soon" },
-//         { id: 9, french: "chacun", english: "each" },
-//         { id: 10, french: "combien", english: "how many" },
-//         { id: 11, french: "comment", english: "how" },
-//         { id: 12, french: "devant", english: "in front" },
-//         { id: 13, french: "en arrière", english: "behind" },
-//         { id: 14, french: "ensuite", english: "then" },
-//         { id: 15, french: "jamais", english: "never" },
-//         { id: 16, french: "long", english: "long" },
-//         { id: 17, french: "longtemps", english: "a long time" },
-//         { id: 18, french: "lorsque", english: "when" },
-//         { id: 19, french: "monsieur", english: "mister" },
-//         { id: 20, french: "parfois", english: "sometimes" },
-//         { id: 21, french: "partout", english: "everywhere" },
-//         { id: 22, french: "pendant", english: "during" },
-//         { id: 23, french: "personne", english: "nobody" },
-//         { id: 24, french: "peut-être", english: "maybe" },
-//         { id: 25, french: "plusieurs", english: "several" },
-//         { id: 26, french: "seulement", english: "only" },
-//         { id: 27, french: "souvent", english: "often" },
-//         { id: 28, french: "temps", english: "time" },
-//         { id: 29, french: "vraiment", english: "really" },
-//         { id: 30, french: "elles montrent", english: "they show" },
-//         { id: 31, french: "ils choisissent", english: "they choose" },
-//         { id: 32, french: "nous sommes", english: "we are" },
-//         { id: 33, french: "elles prennent", english: "they take" },
-//         { id: 34, french: "ils étaient", english: "they were" },
-//     ]
-// };
+// NEW: Get categories for a specific grade
+export const getCategoriesForGrade = (gradeKey) => {
+    return CATEGORIES_BY_GRADE[gradeKey] || [];
+};
+
+// NEW: Get words for a specific category
+export const getWordsForCategory = (gradeKey, categoryId) => {
+    const categories = CATEGORIES_BY_GRADE[gradeKey] || [];
+    const category = categories.find(cat => cat.id === categoryId);
+    return category ? category.words : [];
+};
+
+// NEW: Get all unlocked categories for a grade
+export const getUnlockedCategories = (gradeKey) => {
+    const categories = CATEGORIES_BY_GRADE[gradeKey] || [];
+    return categories.filter(cat => cat.unlocked);
+};
 
 // Settings
 const SETTINGS = {
@@ -167,4 +104,4 @@ const SETTINGS = {
     quizDirection: 'french-to-english',
 };
 
-export { CATEGORY_CONFIG, WORDS_BY_CATEGORY, SETTINGS };
+export { CATEGORY_CONFIG, WORDS_BY_CATEGORY, CATEGORIES_BY_GRADE, SETTINGS };

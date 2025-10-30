@@ -1,6 +1,12 @@
 export const generateQuestion = (category, wordsByCategory, settings, wordPool = null, seenWordIds = []) => {
     const wordsForCategory = wordPool || wordsByCategory[category];
     
+    // Check if wordsForCategory is valid
+    if (!wordsForCategory || !Array.isArray(wordsForCategory)) {
+        console.error('Invalid wordsForCategory:', wordsForCategory, 'for category:', category);
+        return { sessionComplete: true };
+    }
+    
     // Filter out words already seen this session
     const unseenWords = wordsForCategory.filter(word => !seenWordIds.includes(word.id));
     
