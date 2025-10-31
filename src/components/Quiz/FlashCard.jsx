@@ -37,7 +37,7 @@ const FlashCard = ({
                         style={{ backfaceVisibility: 'hidden' }}
                     >
                         <div className="flex items-center gap-4 mb-6">
-                            <div className="text-7xl font-bold text-grade1-700">
+                            <div className="text-5xl font-bold text-grade1-700">
                                 {questionText}
                             </div>
                             <div className="transform hover:scale-110 transition-transform">
@@ -62,7 +62,7 @@ const FlashCard = ({
                         <div className="text-white text-3xl mb-4 opacity-90 font-medium">
                             {questionText}
                         </div>
-                        <div className="text-7xl font-bold text-white drop-shadow-lg">
+                        <div className="text-5xl font-bold text-white drop-shadow-lg">
                             {answerText}
                         </div>
                         <div className="mt-8 flex items-center gap-3 text-white text-lg font-medium opacity-90 animate-bounce-slow">

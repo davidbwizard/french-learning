@@ -217,6 +217,7 @@ const FrenchQuiz = () => {
 				onClose={() => setShowProgress(false)}
 				onStartPracticeMode={startPracticeMode}
 				wordsByCategory={WORDS_BY_CATEGORY}
+				selectedGrade={selectedGrade} // ADD THIS LINE
 			/>
 		);
 	}

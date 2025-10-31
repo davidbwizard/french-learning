@@ -1,9 +1,44 @@
-import React from 'react';
-import { CATEGORY_CONFIG } from '../../data/words';
+import React, { useState } from 'react';
+import { CATEGORY_CONFIG, getCategoriesForGrade } from '../../data/words';
 import { calculatePercentComplete, getProgressDataForCategory } from '../../utils/statsCalculator';
-import { ChartBar, CaretCircleLeft, Trophy, Fire, Target } from '@phosphor-icons/react';
+import { 
+    ChartBar, 
+    CaretCircleLeft, 
+    Trophy, 
+    Fire, 
+    Target, 
+    CaretDown, 
+    CaretRight,
+    BookOpen,
+    Palette,
+    Hash,
+    Dog,
+    Cookie,
+    Cat,
+    House,
+    Tree,
+    Star,
+    Heart,
+    Book,
+    Pencil,
+} from '@phosphor-icons/react';
 
-// Theme styles matching CategoryTabs
+const ICON_MAP = {
+    BookOpen,
+    Palette,
+    Hash,
+    Dog,
+    'Apple': Cookie,
+    'Cat': Cat,
+    'House': House,
+    'Tree': Tree,
+    'Star': Star,
+    'Heart': Heart,
+    'Book': Book,
+    'Pencil': Pencil,
+};
+
+// Theme styles
 const THEME_STYLES = {
     grade1: {
         bg: 'from-grade1-50 to-grade1-100',
@@ -29,8 +64,65 @@ const ProgressReport = ({
     getCurrentStats, 
     onClose, 
     onStartPracticeMode, 
-    wordsByCategory
+    wordsByCategory,
+    selectedGrade
 }) => {
+    const [expandedGrades, setExpandedGrades] = useState([selectedGrade]);
+    
+    const toggleGrade = (gradeKey) => {
+        setExpandedGrades(prev => 
+            prev.includes(gradeKey) 
+                ? prev.filter(g => g !== gradeKey)
+                : [...prev, gradeKey]
+        );
+    };
+    
+    const stats = getCurrentStats();
+    
+    const getGradeStats = (gradeKey) => {
+        const categories = getCategoriesForGrade(gradeKey);
+        let totalWords = 0;
+        let masteredWords = 0;
+        let practiceWords = 0;
+        
+        categories.forEach(category => {
+            const categoryWords = category.words;
+            const { allCorrect, hasIncorrect } = getProgressDataForCategory(
+                gradeKey, 
+                { [gradeKey]: categoryWords }, 
+                stats
+            );
+            
+            totalWords += categoryWords.length;
+            masteredWords += allCorrect.length;
+            practiceWords += hasIncorrect.length;
+        });
+        
+        return {
+            totalWords,
+            masteredWords,
+            practiceWords,
+            percentComplete: Math.round((masteredWords / totalWords) * 100) || 0
+        };
+    };
+    
+    const getGradePracticeWords = (gradeKey) => {
+        const categories = getCategoriesForGrade(gradeKey);
+        const practiceWords = [];
+        
+        categories.forEach(category => {
+            const categoryWords = category.words;
+            const { hasIncorrect } = getProgressDataForCategory(
+                gradeKey,
+                { [gradeKey]: categoryWords },
+                stats
+            );
+            practiceWords.push(...hasIncorrect);
+        });
+        
+        return practiceWords;
+    };
+
     return (
         <div className="min-h-screen bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 p-4 sm:p-8">
             <div className="max-w-5xl mx-auto">
@@ -49,137 +141,223 @@ const ProgressReport = ({
                     </button>
                 </div>
 
-                {/* Category Progress Cards */}
-                {Object.keys(wordsByCategory).map(categoryKey => {
-                    const config = CATEGORY_CONFIG[categoryKey];
-                    const theme = config.theme || categoryKey;
+                {/* Grade Accordions */}
+                {Object.keys(wordsByCategory).map(gradeKey => {
+                    const config = CATEGORY_CONFIG[gradeKey];
+                    const theme = config.theme || gradeKey;
                     const themeStyles = THEME_STYLES[theme] || THEME_STYLES.grade1;
-                    const stats = getCurrentStats();
-                    // Get progress for THIS specific category
-                    const { notAttempted, allCorrect, hasIncorrect, total } = getProgressDataForCategory(categoryKey, wordsByCategory, stats);
-                    const percentComplete = calculatePercentComplete(allCorrect, total);
                     const Icon = config.icon;
+                    const isExpanded = expandedGrades.includes(gradeKey);
+                    const gradeStats = getGradeStats(gradeKey);
+                    const gradePracticeWords = getGradePracticeWords(gradeKey);
+                    const categories = getCategoriesForGrade(gradeKey);
                     
                     return (
                         <div 
-                            key={categoryKey} 
-                            className={`mb-6 bg-gradient-to-br ${themeStyles.bg} rounded-3xl shadow-2xl p-6 border-4 ${themeStyles.border}`}
+                            key={gradeKey} 
+                            className={`mb-6 bg-gradient-to-br ${themeStyles.bg} rounded-3xl shadow-2xl border-4 ${themeStyles.border} overflow-hidden`}
                         >
-                            {/* Category Header */}
-                            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
-                                <h2 className={`text-2xl sm:text-3xl font-bold ${themeStyles.text} flex items-center gap-3`}>
-                                    <div className="p-2 bg-white/60 rounded-xl">
-                                        <Icon size={36} weight="duotone" />
+                            {/* Grade Header - FIXED: Split into clickable and non-clickable sections */}
+                            <div className="p-6">
+                                <div className="flex flex-row sm:flex-row justify-between items-start sm:items-center gap-4">
+                                    {/* Left side - Clickable accordion toggle */}
+                                    <button
+                                        onClick={() => toggleGrade(gradeKey)}
+                                        className="flex items-center gap-4 hover:opacity-80 transition-opacity"
+                                    >
+                                        {isExpanded ? (
+                                            <CaretDown size={32} weight="bold" className={themeStyles.text} />
+                                        ) : (
+                                            <CaretRight size={32} weight="bold" className={themeStyles.text} />
+                                        )}
+                                        <div className="p-2 bg-white/60 rounded-xl">
+                                            <Icon size={24} weight="duotone" />
+                                        </div>
+                                        <div className="text-left">
+                                            <h2 className={`text-1xl sm:text-3xl font-bold ${themeStyles.text}`}>
+                                                {config.label} <span className="text-sm text-gray-600 font-semibold">({gradeStats.percentComplete}%)</span>
+                                            </h2>
+                                            <p className="text-sm text-gray-600 font-semibold">
+                                                {gradeStats.masteredWords}/{gradeStats.totalWords} mastered
+                                            </p>
+                                        </div>
+                                    </button>
+                                    
+                                    {/* Right side - Action buttons (NOT nested in accordion button) */}
+                                    <div className="flex items-center gap-3">
+                                        {/* Grade-level Practice Button */}
+                                        {gradePracticeWords.length > 0 && (
+											<button
+											onClick={() => onStartPracticeMode(gradeKey, gradePracticeWords)}
+											className="flex items-center gap-2 px-3 sm:px-5 py-2 sm:py-2.5 bg-gradient-to-r from-celebration-500 to-celebration-600 hover:from-celebration-600 hover:to-celebration-700 text-white rounded-xl transition-all transform hover:scale-105 font-bold text-xs sm:text-sm shadow-lg whitespace-nowrap"
+										>
+											<Fire size={16} className="sm:hidden" weight="duotone" />
+											<Fire size={20} className="hidden sm:block" weight="duotone" />
+											<span className="hidden sm:inline">Practice All ({gradePracticeWords.length})</span>
+											<span className="sm:hidden">Practice ({gradePracticeWords.length})</span>
+										</button>
+                                        )}
+                                        
+                                        {/* Progress Badge */}
+                                        {/* <div className="text-center bg-white/80 backdrop-blur-sm rounded-2xl px-5 py-3 shadow-lg">
+                                            <div className="text-3xl font-bold text-grade1-700">
+                                                {gradeStats.percentComplete}%
+                                            </div>
+                                        </div> */}
                                     </div>
-                                    <span>{config.label}</span>
-                                </h2>
-                                <div className="text-center bg-white/80 backdrop-blur-sm rounded-2xl px-5 py-3 shadow-lg">
-                                    <div className="text-3xl font-bold text-grade1-700">{percentComplete}%</div>
-                                    <div className="text-sm font-semibold text-gray-600">
-                                        {allCorrect.length}/{total} mastered
+                                </div>
+
+                                {/* Progress Bar */}
+                                <div className="mt-4">
+                                    <div className="w-full bg-white/50 rounded-full h-6 shadow-inner overflow-hidden">
+                                        <div 
+                                            className={`${themeStyles.progress} h-6 rounded-full transition-all duration-500 flex items-center justify-end pr-3 shadow-lg`}
+                                            style={{ width: `${gradeStats.percentComplete}%` }}
+                                        >
+                                            {gradeStats.percentComplete > 15 && (
+                                                <span className="text-white font-bold text-sm">
+                                                    {gradeStats.percentComplete}%
+                                                </span>
+                                            )}
+                                        </div>
                                     </div>
                                 </div>
                             </div>
 
-                            {/* Progress Bar */}
-                            <div className="w-full bg-white/50 rounded-full h-8 mb-6 shadow-inner overflow-hidden">
-                                <div 
-                                    className={`${themeStyles.progress} h-8 rounded-full transition-all duration-500 flex items-center justify-end pr-3 shadow-lg`}
-                                    style={{ width: `${percentComplete}%` }}
-                                >
-                                    {percentComplete > 15 && (
-                                        <span className="text-white font-bold text-sm">
-                                            {percentComplete}%
-                                        </span>
-                                    )}
-                                </div>
-                            </div>
-
-                            {/* Stats Sections */}
-                            <div className="space-y-4">
-                                {/* Not Attempted */}
-                                <div className="bg-white/80 backdrop-blur-sm p-5 rounded-2xl border-3 border-grade2-200 shadow-lg">
-                                    <h3 className="text-lg sm:text-xl font-bold text-grade2-700 mb-3 flex items-center gap-2">
-                                        <Target size={24} weight="duotone" />
-                                        <span>Not Tried Yet ({notAttempted.length})</span>
-                                    </h3>
-                                    <div className="flex flex-wrap gap-2">
-                                        {notAttempted.length > 0 ? (
-                                            notAttempted.map(w => (
-                                                <span 
-                                                    key={w.id} 
-                                                    className="px-3 py-2 bg-grade2-100 hover:bg-grade2-200 rounded-xl text-sm font-bold text-grade2-700 transition-all transform hover:scale-105 shadow"
-                                                >
-                                                    {w.french}
-                                                </span>
-                                            ))
-                                        ) : (
-                                            <span className="text-grade2-600 text-base font-semibold">
-                                                All words attempted! 🎉
-                                            </span>
-                                        )}
-                                    </div>
-                                </div>
-
-                                {/* All Correct */}
-                                <div className="bg-white/80 backdrop-blur-sm p-5 rounded-2xl border-3 border-success-200 shadow-lg">
-                                    <h3 className="text-lg sm:text-xl font-bold text-success-700 mb-3 flex items-center gap-2">
-                                        <Trophy size={24} weight="duotone" />
-                                        <span>Mastered! 🌟 ({allCorrect.length})</span>
-                                    </h3>
-                                    <div className="flex flex-wrap gap-2">
-                                        {allCorrect.length > 0 ? (
-                                            allCorrect.map(w => (
-                                                <span 
-                                                    key={w.id} 
-                                                    className="px-3 py-2 bg-success-100 hover:bg-success-200 rounded-xl text-sm font-bold text-success-700 transition-all transform hover:scale-105 shadow"
-                                                >
-                                                    {w.french} ({stats[w.id].correct}/{stats[w.id].attempts})
-                                                </span>
-                                            ))
-                                        ) : (
-                                            <span className="text-success-600 text-base font-semibold">
-                                                Keep practicing! 💪
-                                            </span>
-                                        )}
-                                    </div>
-                                </div>
-
-                                {/* Need Practice */}
-                                <div className="bg-white/80 backdrop-blur-sm p-5 rounded-2xl border-3 border-celebration-300 shadow-lg">
-                                    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-3">
-                                        <h3 className="text-lg sm:text-xl font-bold text-celebration-700 flex items-center gap-2">
-                                            <Fire size={24} weight="duotone" />
-                                            <span>Need Practice 💪 ({hasIncorrect.length})</span>
-                                        </h3>
-                                        {hasIncorrect.length > 0 && (
-                                            <button 
-                                                onClick={() => onStartPracticeMode(categoryKey, hasIncorrect)} 
-                                                className="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-celebration-500 to-celebration-600 hover:from-celebration-600 hover:to-celebration-700 text-white rounded-xl transition-all transform hover:scale-105 font-bold text-sm shadow-lg whitespace-nowrap"
+                            {/* Category Breakdown - Expandable */}
+                            {isExpanded && (
+                                <div className="px-6 pb-6 space-y-4 transition-all duration-300">
+                                    {categories.map(category => {
+                                        const categoryWords = category.words;
+                                        const { notAttempted, allCorrect, hasIncorrect, total } = getProgressDataForCategory(
+                                            gradeKey,
+                                            { [gradeKey]: categoryWords },
+                                            stats
+                                        );
+                                        const percentComplete = calculatePercentComplete(allCorrect, total);
+                                        
+                                        // FIXED: Use icon mapping with fallback
+                                        const CategoryIcon = ICON_MAP[category.icon] || BookOpen;
+                                        
+                                        return (
+                                            <div 
+                                                key={category.id}
+                                                className="bg-white/90 backdrop-blur-sm rounded-2xl p-5 shadow-lg border-2 border-white/50"
                                             >
-                                                <Fire size={20} weight="duotone" />
-                                                <span>Practice These</span>
-                                            </button>
-                                        )}
-                                    </div>
-                                    <div className="flex flex-wrap gap-2">
-                                        {hasIncorrect.length > 0 ? (
-                                            hasIncorrect.map(w => (
-                                                <span 
-                                                    key={w.id} 
-                                                    className="px-3 py-2 bg-celebration-100 hover:bg-celebration-200 rounded-xl text-sm font-bold text-celebration-700 transition-all transform hover:scale-105 shadow"
-                                                >
-                                                    {w.french} ({stats[w.id].correct}/{stats[w.id].attempts})
-                                                </span>
-                                            ))
-                                        ) : (
-                                            <span className="text-celebration-600 text-base font-semibold">
-                                                No mistakes yet! ✨
-                                            </span>
-                                        )}
-                                    </div>
+                                                {/* Category Header */}
+                                                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-4">
+                                                    <div className="flex items-center gap-3">
+                                                        <div className="p-2 bg-gradient-to-br from-blue-100 to-purple-100 rounded-xl">
+                                                            <CategoryIcon size={28} weight="duotone" />
+                                                        </div>
+                                                        <div>
+                                                            <h3 className="text-xl font-bold text-gray-800">
+                                                                {category.name}
+                                                            </h3>
+                                                            <p className="text-sm text-gray-600">
+                                                                {category.nameEnglish}
+                                                            </p>
+                                                        </div>
+                                                    </div>
+                                                    
+                                                    <div className="flex items-center gap-3">
+                                                        {/* Category Practice Button */}
+                                                        {hasIncorrect.length > 0 && (
+                                                            <button 
+                                                                onClick={() => onStartPracticeMode(gradeKey, hasIncorrect)} 
+                                                                className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-celebration-500 to-celebration-600 hover:from-celebration-600 hover:to-celebration-700 text-white rounded-xl transition-all transform hover:scale-105 font-bold text-sm shadow-lg whitespace-nowrap"
+                                                            >
+                                                                <Fire size={18} weight="duotone" />
+                                                                <span>Practice ({hasIncorrect.length})</span>
+                                                            </button>
+                                                        )}
+                                                        
+                                                        <div className="text-center bg-gradient-to-br from-blue-50 to-purple-50 rounded-xl px-4 py-2 shadow">
+                                                            <div className="text-2xl font-bold text-grade1-700">
+                                                                {percentComplete}%
+                                                            </div>
+                                                            <div className="text-xs font-semibold text-gray-600">
+                                                                {allCorrect.length}/{total}
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                {/* Category Progress Bar */}
+                                                <div className="w-full bg-gray-200 rounded-full h-4 mb-4 shadow-inner overflow-hidden">
+                                                    <div 
+                                                        className={`${themeStyles.progress} h-4 rounded-full transition-all duration-500`}
+                                                        style={{ width: `${percentComplete}%` }}
+                                                    />
+                                                </div>
+
+                                                {/* Category Stats Sections */}
+                                                <div className="space-y-3">
+                                                    {/* Not Attempted */}
+                                                    {notAttempted.length > 0 && (
+                                                        <div className="bg-grade2-50 p-4 rounded-xl border-2 border-grade2-200">
+                                                            <h4 className="text-sm font-bold text-grade2-700 mb-2 flex items-center gap-2">
+                                                                <Target size={18} weight="duotone" />
+                                                                <span>Not Tried Yet ({notAttempted.length})</span>
+                                                            </h4>
+                                                            <div className="flex flex-wrap gap-2">
+                                                                {notAttempted.map(w => (
+                                                                    <span 
+                                                                        key={w.id} 
+                                                                        className="px-3 py-1 bg-grade2-100 rounded-lg text-xs font-bold text-grade2-700"
+                                                                    >
+                                                                        {w.french}
+                                                                    </span>
+                                                                ))}
+                                                            </div>
+                                                        </div>
+                                                    )}
+
+                                                    {/* Mastered */}
+                                                    {allCorrect.length > 0 && (
+                                                        <div className="bg-success-50 p-4 rounded-xl border-2 border-success-200">
+                                                            <h4 className="text-sm font-bold text-success-700 mb-2 flex items-center gap-2">
+                                                                <Trophy size={18} weight="duotone" />
+                                                                <span>Mastered! ⭐ ({allCorrect.length})</span>
+                                                            </h4>
+                                                            <div className="flex flex-wrap gap-2">
+                                                                {allCorrect.map(w => (
+                                                                    <span 
+                                                                        key={w.id} 
+                                                                        className="px-3 py-1 bg-success-100 rounded-lg text-xs font-bold text-success-700"
+                                                                    >
+                                                                        {w.french} ({stats[w.id].correct}/{stats[w.id].attempts})
+                                                                    </span>
+                                                                ))}
+                                                            </div>
+                                                        </div>
+                                                    )}
+
+                                                    {/* Need Practice */}
+                                                    {hasIncorrect.length > 0 && (
+                                                        <div className="bg-celebration-50 p-4 rounded-xl border-2 border-celebration-200">
+                                                            <h4 className="text-sm font-bold text-celebration-700 mb-2 flex items-center gap-2">
+                                                                <Fire size={18} weight="duotone" />
+                                                                <span>Need Practice 💪 ({hasIncorrect.length})</span>
+                                                            </h4>
+                                                            <div className="flex flex-wrap gap-2">
+                                                                {hasIncorrect.map(w => (
+                                                                    <span 
+                                                                        key={w.id} 
+                                                                        className="px-3 py-1 bg-celebration-100 rounded-lg text-xs font-bold text-celebration-700"
+                                                                    >
+                                                                        {w.french} ({stats[w.id].correct}/{stats[w.id].attempts})
+                                                                    </span>
+                                                                ))}
+                                                            </div>
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        );
+                                    })}
                                 </div>
-                            </div>
+                            )}
                         </div>
                     );
                 })}

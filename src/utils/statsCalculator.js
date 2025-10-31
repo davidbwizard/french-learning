@@ -2,8 +2,12 @@ export const getProgressDataForCategory = (category, wordsByCategory, stats) => 
     const wordsForCategory = wordsByCategory[category];
     const notAttempted = wordsForCategory.filter(w => !stats[w.id]);
     const attempted = wordsForCategory.filter(w => stats[w.id]);
-    const allCorrect = attempted.filter(w => stats[w.id].incorrect === 0);
-    const hasIncorrect = attempted.filter(w => stats[w.id].incorrect > 0);
+    
+    // FIXED: Mastered = more correct than incorrect (allows recovery from mistakes)
+    const allCorrect = attempted.filter(w => stats[w.id].correct > stats[w.id].incorrect);
+    
+    // FIXED: Needs practice = incorrect >= correct (includes ties at 1/1)
+    const hasIncorrect = attempted.filter(w => stats[w.id].incorrect >= stats[w.id].correct);
     
     return { 
         notAttempted, 
@@ -19,7 +23,12 @@ export const calculatePercentComplete = (allCorrect, total) => {
 
 export const calculateOverallProgress = (wordsByCategory, stats) => {
     const totalWords = Object.values(wordsByCategory).flat().length;
-    const masteredWords = Object.values(stats).filter(s => s.incorrect === 0 && s.attempts > 0).length;
+    
+    // FIXED: Mastered = more correct than incorrect
+    const masteredWords = Object.values(stats).filter(s => 
+        s.attempts > 0 && s.correct > s.incorrect
+    ).length;
+    
     return Math.round((masteredWords / totalWords) * 100);
 };
 
